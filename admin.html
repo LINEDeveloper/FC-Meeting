@@ -11,7 +11,6 @@
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
-        /* Premium Card Shadow */
         .glass-card { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03); }
     </style>
 </head>
@@ -95,8 +94,7 @@
                                 <p class="text-xs text-gray-400 mt-1">Completion Progress by Channel</p>
                             </div>
                         </div>
-                        <div id="channelList" class="space-y-5">
-                            </div>
+                        <div id="channelList" class="space-y-5"></div>
                     </div>
 
                     <div class="bg-white rounded-3xl p-6 md:p-8 glass-card border border-gray-50 h-fit flex flex-col">
@@ -105,7 +103,7 @@
                             <p class="text-xs text-gray-400 mt-1">Export Data to Excel</p>
                         </div>
                         
-                        <div class="space-y-4">
+                        <div class="space-y-5">
                             <button onclick="exportFile('downloadResultsExcel')" id="btnResult" class="relative overflow-hidden w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white p-5 rounded-2xl font-bold text-sm transition-all transform active:scale-95 shadow-lg shadow-red-200 flex items-center gap-4 group">
                                 <div class="bg-white/20 p-3 rounded-xl shrink-0 group-hover:scale-110 transition">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -116,15 +114,23 @@
                                 </div>
                             </button>
 
-                            <button onclick="exportFile('downloadTrackingExcel')" id="btnTrack" class="w-full bg-white border-2 border-gray-100 hover:border-red-500 hover:bg-red-50 text-gray-700 hover:text-red-600 p-5 rounded-2xl font-bold text-sm transition-all transform active:scale-95 flex items-center gap-4 group">
-                                <div class="bg-gray-100 group-hover:bg-white p-3 rounded-xl shrink-0 text-gray-500 group-hover:text-red-500 transition">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                </div>
-                                <div class="text-left">
-                                    <span class="block text-base">ติดตามพนักงาน</span>
-                                    <span class="block text-xs font-normal text-gray-400 group-hover:text-red-400 mt-0.5">รายชื่อพนักงานที่ยังไม่ได้เข้าสอบ</span>
-                                </div>
-                            </button>
+                            <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">ดาวน์โหลดแยกช่องทาง (ติดตามสอบ)</label>
+                                
+                                <select id="channelSelect" class="w-full bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-red-500 transition mb-3 cursor-pointer shadow-sm">
+                                    <option value="All">รวมทุกช่องทาง (All Channels)</option>
+                                </select>
+
+                                <button onclick="exportTracking()" id="btnTrack" class="w-full bg-white border-2 border-gray-200 hover:border-red-500 hover:bg-red-50 text-gray-700 hover:text-red-600 p-4 rounded-xl font-bold text-sm transition-all transform active:scale-95 flex items-center gap-4 group shadow-sm">
+                                    <div class="bg-gray-100 group-hover:bg-white p-2.5 rounded-xl shrink-0 text-gray-500 group-hover:text-red-500 transition">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    </div>
+                                    <div class="text-left flex-1">
+                                        <span class="block text-[15px]">ติดตามพนักงาน</span>
+                                        <span class="block text-[11px] font-normal text-gray-400 group-hover:text-red-400 mt-0.5">โหลดตามช่องทางที่เลือกด้านบน</span>
+                                    </div>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -134,7 +140,6 @@
     </main>
 
     <script>
-        // ⚠️ โค้ดส่วน API และ Logic คงเดิม 100% ไม่มีการดัดแปลง
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx6Qq3EJQ41GWV5wzK3_h8rSjpZkvUVl7GHXIEJ2zdl-Iu5GyUBMOJDJud5ywMe1z5lZQ/exec"; 
 
         async function fetchGAS(action, args = []) {
@@ -161,7 +166,9 @@
                 document.getElementById('valAvgScore').innerText = data.avgScore;
 
                 const channelContainer = document.getElementById('channelList');
+                const channelSelect = document.getElementById('channelSelect');
                 channelContainer.innerHTML = '';
+                channelSelect.innerHTML = '<option value="All">รวมทุกช่องทาง (All Channels)</option>';
                 
                 let chArray = [];
                 for (let ch in data.channelStats) {
@@ -172,7 +179,6 @@
                 chArray.sort((a, b) => b.percent - a.percent);
 
                 chArray.forEach(ch => {
-                    // ปรับสีหลอด Progress Bar เป็น True Red (แดงคลีนๆ)
                     channelContainer.innerHTML += `
                         <div class="group">
                             <div class="flex justify-between items-end text-sm font-bold text-gray-700 mb-2">
@@ -184,6 +190,7 @@
                             </div>
                         </div>
                     `;
+                    channelSelect.innerHTML += `<option value="${ch.name}">${ch.name}</option>`;
                 });
 
                 document.getElementById('loadingState').classList.add('hidden');
@@ -194,12 +201,16 @@
             }
         }
 
-        async function exportFile(actionName) {
+        function exportTracking() {
+            const selectedChannel = document.getElementById('channelSelect').value;
+            exportFile('downloadTrackingExcel', [selectedChannel]);
+        }
+
+        async function exportFile(actionName, args = []) {
             const btnId = actionName === 'downloadTrackingExcel' ? 'btnTrack' : 'btnResult';
             const btn = document.getElementById(btnId);
             const originalHtml = btn.innerHTML;
             
-            // เปลี่ยนปุ่มเป็นสถานะโหลด
             if (actionName === 'downloadResultsExcel') {
                 btn.innerHTML = `<div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white mx-auto"></div>`;
             } else {
@@ -208,7 +219,7 @@
             btn.disabled = true;
 
             try {
-                const result = await fetchGAS(actionName);
+                const result = await fetchGAS(actionName, args);
                 
                 const byteCharacters = atob(result.base64);
                 const byteNumbers = new Array(byteCharacters.length);
@@ -226,7 +237,7 @@
                 document.body.removeChild(link);
 
             } catch (err) {
-                alert("เกิดข้อผิดพลาดในการดาวน์โหลด: " + err.message);
+                alert("แจ้งเตือน: " + err.message);
             } finally {
                 btn.innerHTML = originalHtml;
                 btn.disabled = false;
