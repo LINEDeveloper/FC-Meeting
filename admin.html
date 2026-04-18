@@ -3,102 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Quiz System</title>
+    <title>Admin Dashboard - FC Meeting</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Sarabun', sans-serif; background-color: #f3f4f6; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+        /* Premium Card Shadow */
+        .glass-card { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03); }
     </style>
 </head>
 <body class="text-gray-800 h-screen flex flex-col">
 
-    <header class="bg-gradient-to-r from-slate-800 to-slate-900 shadow-md py-4 px-6 shrink-0 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-inner">
-                <span class="text-xl">📊</span>
-            </div>
+    <header class="bg-white border-b border-gray-100 shadow-sm py-4 px-6 md:px-10 shrink-0 flex justify-between items-center z-10 relative">
+        <div class="flex items-center gap-4">
+            <img src="https://img2.pic.in.th/True--C.png" class="h-8 md:h-9 w-auto drop-shadow-sm" alt="True Logo">
+            <div class="h-8 w-px bg-gray-200 hidden md:block"></div>
             <div>
-                <h1 class="text-xl font-bold text-white leading-tight">Admin Dashboard</h1>
-                <p class="text-xs text-slate-300">FC Meeting Quiz Overview</p>
+                <h1 class="text-lg md:text-xl font-extrabold text-gray-800 leading-none tracking-tight">Admin Dashboard</h1>
+                <p class="text-[11px] md:text-xs text-red-600 font-bold uppercase tracking-wider mt-1">FC Meeting Quiz</p>
             </div>
         </div>
-        <button onclick="loadDashboardData()" class="text-slate-300 hover:text-white transition">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+        <button onclick="loadDashboardData()" class="flex items-center justify-center w-10 h-10 bg-gray-50 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-full transition-colors duration-200">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
         </button>
     </header>
 
     <main class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
-        <div class="max-w-6xl mx-auto space-y-6">
+        <div class="max-w-6xl mx-auto space-y-8">
             
-            <div id="loadingState" class="flex flex-col items-center justify-center py-20">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-                <p class="text-gray-500 font-medium">กำลังดึงข้อมูลล่าสุด...</p>
+            <div id="loadingState" class="flex flex-col items-center justify-center py-24">
+                <div class="relative w-16 h-16 mb-4">
+                    <div class="absolute inset-0 rounded-full border-4 border-gray-100"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-red-600 animate-spin"></div>
+                </div>
+                <p class="text-gray-500 font-medium tracking-wide">กำลังเตรียมข้อมูลสรุป...</p>
             </div>
 
-            <div id="dashboardContent" class="hidden space-y-6 animate-[fade-in-up_0.5s_ease-out]">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 text-2xl shrink-0">👥</div>
+            <div id="dashboardContent" class="hidden space-y-8 animate-[fade-in-up_0.5s_ease-out]">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    
+                    <div class="bg-white rounded-3xl p-6 glass-card border border-gray-50 flex items-center gap-5 transition hover:-translate-y-1 duration-300">
+                        <div class="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 shrink-0">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        </div>
                         <div>
-                            <p class="text-sm font-bold text-gray-400 uppercase tracking-wider">เข้าสอบแล้ว / เป้าหมาย</p>
-                            <div class="flex items-baseline gap-2">
-                                <span class="text-3xl font-black text-gray-800" id="valTested">0</span>
-                                <span class="text-lg font-medium text-gray-500">/ <span id="valTarget">0</span> คน</span>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">เข้าสอบแล้ว / เป้าหมาย</p>
+                            <div class="flex items-baseline gap-1.5">
+                                <span class="text-3xl font-black text-gray-800 tracking-tight" id="valTested">0</span>
+                                <span class="text-sm font-bold text-gray-400">/ <span id="valTarget">0</span></span>
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center text-green-600 text-2xl shrink-0">📈</div>
+
+                    <div class="bg-white rounded-3xl p-6 glass-card border border-gray-50 flex items-center gap-5 transition hover:-translate-y-1 duration-300">
+                        <div class="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-700 shrink-0">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                        </div>
                         <div>
-                            <p class="text-sm font-bold text-gray-400 uppercase tracking-wider">คิดเป็นเปอร์เซ็นต์</p>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">สัดส่วนผู้เข้าสอบ</p>
                             <div class="flex items-baseline gap-1">
-                                <span class="text-3xl font-black text-gray-800" id="valPercent">0</span>
-                                <span class="text-xl font-bold text-gray-600">%</span>
+                                <span class="text-3xl font-black text-gray-800 tracking-tight" id="valPercent">0</span>
+                                <span class="text-lg font-bold text-gray-500">%</span>
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-600 text-2xl shrink-0">⭐</div>
+
+                    <div class="bg-white rounded-3xl p-6 glass-card border border-gray-50 flex items-center gap-5 transition hover:-translate-y-1 duration-300">
+                        <div class="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 shrink-0">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                        </div>
                         <div>
-                            <p class="text-sm font-bold text-gray-400 uppercase tracking-wider">คะแนนเฉลี่ย</p>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">คะแนนเฉลี่ย</p>
                             <div class="flex items-baseline gap-1">
-                                <span class="text-3xl font-black text-gray-800" id="valAvgScore">0</span>
-                                <span class="text-xl font-bold text-gray-600">คะแนน</span>
+                                <span class="text-3xl font-black text-gray-800 tracking-tight" id="valAvgScore">0</span>
+                                <span class="text-sm font-bold text-gray-500">คะแนน</span>
                             </div>
                         </div>
                     </div>
+
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                        <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">ความคืบหน้าแยกตามช่องทาง (Channels)</h2>
-                        <div id="channelList" class="space-y-4"></div>
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    
+                    <div class="xl:col-span-2 bg-white rounded-3xl p-6 md:p-8 glass-card border border-gray-50">
+                        <div class="flex justify-between items-end mb-6 border-b border-gray-100 pb-4">
+                            <div>
+                                <h2 class="text-lg font-extrabold text-gray-800">สรุปการสอบแยกตามช่องทาง</h2>
+                                <p class="text-xs text-gray-400 mt-1">Completion Progress by Channel</p>
+                            </div>
+                        </div>
+                        <div id="channelList" class="space-y-5">
+                            </div>
                     </div>
 
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 h-fit">
-                        <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">ส่งออกรายงาน (Export)</h2>
+                    <div class="bg-white rounded-3xl p-6 md:p-8 glass-card border border-gray-50 h-fit flex flex-col">
+                        <div class="mb-6 border-b border-gray-100 pb-4">
+                            <h2 class="text-lg font-extrabold text-gray-800">ดาวน์โหลดรายงาน</h2>
+                            <p class="text-xs text-gray-400 mt-1">Export Data to Excel</p>
+                        </div>
+                        
                         <div class="space-y-4">
-                            <button onclick="exportFile('downloadTrackingExcel')" id="btnTrack" class="w-full bg-slate-800 hover:bg-slate-900 text-white p-4 rounded-xl font-bold text-sm transition flex flex-col items-center justify-center gap-1 shadow-md">
-                                <span class="text-xl">📥</span>
-                                ดาวน์โหลด Excel: ติดตามสอบ
-                                <span class="text-xs font-normal text-slate-300">รายชื่อพนักงานที่ยังไม่เข้าสอบ</span>
+                            <button onclick="exportFile('downloadResultsExcel')" id="btnResult" class="relative overflow-hidden w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white p-5 rounded-2xl font-bold text-sm transition-all transform active:scale-95 shadow-lg shadow-red-200 flex items-center gap-4 group">
+                                <div class="bg-white/20 p-3 rounded-xl shrink-0 group-hover:scale-110 transition">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                </div>
+                                <div class="text-left">
+                                    <span class="block text-base">สรุปผลการสอบ</span>
+                                    <span class="block text-xs font-normal text-red-100 mt-0.5">คะแนนเฉลี่ย และผลการผ่านเกณฑ์</span>
+                                </div>
                             </button>
 
-                            <button onclick="exportFile('downloadResultsExcel')" id="btnResult" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold text-sm transition flex flex-col items-center justify-center gap-1 shadow-md">
-                                <span class="text-xl">📊</span>
-                                ดาวน์โหลด Excel: สรุปผลสอบ
-                                <span class="text-xs font-normal text-blue-200">คะแนนเฉลี่ยและคนผ่านเกณฑ์</span>
+                            <button onclick="exportFile('downloadTrackingExcel')" id="btnTrack" class="w-full bg-white border-2 border-gray-100 hover:border-red-500 hover:bg-red-50 text-gray-700 hover:text-red-600 p-5 rounded-2xl font-bold text-sm transition-all transform active:scale-95 flex items-center gap-4 group">
+                                <div class="bg-gray-100 group-hover:bg-white p-3 rounded-xl shrink-0 text-gray-500 group-hover:text-red-500 transition">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                </div>
+                                <div class="text-left">
+                                    <span class="block text-base">ติดตามพนักงาน</span>
+                                    <span class="block text-xs font-normal text-gray-400 group-hover:text-red-400 mt-0.5">รายชื่อพนักงานที่ยังไม่ได้เข้าสอบ</span>
+                                </div>
                             </button>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
     </main>
 
     <script>
+        // ⚠️ โค้ดส่วน API และ Logic คงเดิม 100% ไม่มีการดัดแปลง
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx6Qq3EJQ41GWV5wzK3_h8rSjpZkvUVl7GHXIEJ2zdl-Iu5GyUBMOJDJud5ywMe1z5lZQ/exec"; 
 
         async function fetchGAS(action, args = []) {
@@ -136,15 +172,15 @@
                 chArray.sort((a, b) => b.percent - a.percent);
 
                 chArray.forEach(ch => {
-                    let colorClass = ch.percent >= 80 ? 'bg-green-500' : (ch.percent >= 50 ? 'bg-yellow-400' : 'bg-red-500');
+                    // ปรับสีหลอด Progress Bar เป็น True Red (แดงคลีนๆ)
                     channelContainer.innerHTML += `
-                        <div>
-                            <div class="flex justify-between text-sm font-bold text-gray-700 mb-1">
-                                <span>${ch.name} <span class="text-gray-400 font-normal ml-1">(${ch.tested}/${ch.target})</span></span>
-                                <span>${ch.percent}%</span>
+                        <div class="group">
+                            <div class="flex justify-between items-end text-sm font-bold text-gray-700 mb-2">
+                                <span class="group-hover:text-red-600 transition-colors">${ch.name} <span class="text-gray-400 font-medium ml-1">(${ch.tested}/${ch.target})</span></span>
+                                <span class="text-red-600">${ch.percent}%</span>
                             </div>
-                            <div class="w-full bg-gray-100 rounded-full h-2.5">
-                                <div class="${colorClass} h-2.5 rounded-full transition-all duration-1000" style="width: ${ch.percent}%"></div>
+                            <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                                <div class="bg-gradient-to-r from-red-500 to-red-600 h-full rounded-full transition-all duration-1000 ease-out" style="width: ${ch.percent}%"></div>
                             </div>
                         </div>
                     `;
@@ -154,6 +190,7 @@
                 document.getElementById('dashboardContent').classList.remove('hidden');
             } catch (err) {
                 alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + err.message);
+                document.getElementById('loadingState').innerHTML = `<p class="text-red-500 font-bold text-center">โหลดข้อมูลไม่สำเร็จ<br><button onclick="loadDashboardData()" class="mt-4 underline text-sm text-gray-500 hover:text-red-600">ลองใหม่อีกครั้ง</button></p>`;
             }
         }
 
@@ -162,7 +199,12 @@
             const btn = document.getElementById(btnId);
             const originalHtml = btn.innerHTML;
             
-            btn.innerHTML = `<div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div> กำลังสร้างไฟล์...`;
+            // เปลี่ยนปุ่มเป็นสถานะโหลด
+            if (actionName === 'downloadResultsExcel') {
+                btn.innerHTML = `<div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white mx-auto"></div>`;
+            } else {
+                btn.innerHTML = `<div class="animate-spin rounded-full h-6 w-6 border-b-2 border-red-500 mx-auto"></div>`;
+            }
             btn.disabled = true;
 
             try {
@@ -184,7 +226,7 @@
                 document.body.removeChild(link);
 
             } catch (err) {
-                alert("เกิดข้อผิดพลาด: " + err.message);
+                alert("เกิดข้อผิดพลาดในการดาวน์โหลด: " + err.message);
             } finally {
                 btn.innerHTML = originalHtml;
                 btn.disabled = false;
