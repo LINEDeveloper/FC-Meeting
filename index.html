@@ -60,60 +60,62 @@
     </div>
 
     <div id="loginScreen" class="hidden flex-grow flex items-center justify-center p-4">
-        <div class="bg-white rounded-[2.5rem] shadow-2xl max-w-md w-full overflow-hidden border border-gray-100">
-            <div class="bg-gradient-to-r from-red-600 to-blue-500 p-8 text-white text-center">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl max-w-md w-full max-h-[95vh] overflow-y-auto custom-scrollbar border border-gray-100 flex flex-col">
+            <div class="bg-gradient-to-r from-red-600 to-blue-500 p-8 text-white text-center shrink-0">
                 <h1 id="lblQuizName" class="text-2xl font-bold mb-1">...</h1>
                 <p class="text-blue-100 text-sm">ระบบยืนยันตัวตนอัตโนมัติ</p>
             </div>
-            <div class="p-8 space-y-6">
+            <div class="p-8 flex flex-col gap-6 shrink-0">
                 
-                <div id="autoVerifyContainer" class="flex flex-col items-center justify-center py-6 bg-blue-50 rounded-[1.5rem] border border-blue-100">
-                    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3"></div>
-                    <p class="text-sm font-bold text-blue-600 animate-pulse">กำลังตรวจสอบข้อมูล LINE ID...</p>
-                </div>
-
-                <div id="profileCard" class="hidden bg-gradient-to-br from-gray-50 to-white p-5 rounded-[1.5rem] border border-gray-200 shadow-sm text-center transform transition-all duration-300">
-                    <div class="flex flex-col items-center justify-center">
-                        <div class="relative mb-3">
-                            <img id="displayProfilePic" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md">
-                            <div class="absolute bottom-0 right-0 bg-green-500 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center">
-                                <span class="text-white text-xs font-bold">✓</span>
-                            </div>
-                        </div>
-                        <h3 id="displayFullName" class="text-lg font-bold text-gray-800 mb-1">...</h3>
-                        <div class="bg-blue-50 text-blue-700 px-4 py-1 rounded-full text-sm font-bold mb-2">
-                            รหัสพนักงาน: <span id="displayEmpId">...</span>
-                        </div>
-                        <p class="text-sm text-gray-600">แผนก: <span id="displayDept" class="font-medium text-gray-800">...</span></p>
+                <div id="authDynamicArea" class="w-full">
+                    <div id="autoVerifyContainer" class="flex flex-col items-center justify-center py-6 bg-blue-50 rounded-[1.5rem] border border-blue-100">
+                        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3"></div>
+                        <p class="text-sm font-bold text-blue-600 animate-pulse">กำลังตรวจสอบข้อมูล LINE ID...</p>
                     </div>
-                </div>
 
-                <div id="manualIdContainer" class="hidden space-y-2">
-                    <label class="text-sm font-bold text-gray-700 ml-1">รหัสพนักงาน (ไม่พบข้อมูลจาก LINE)</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="inpEmpId" class="flex-1 px-4 py-3 border rounded-2xl focus:ring-2 focus:ring-orange-400 outline-none transition text-sm bg-gray-50" placeholder="กรุณากรอกรหัสพนักงาน...">
-                        <button onclick="verifyManualId()" id="btnVerifyEmp" class="bg-gray-800 text-white px-4 py-2 rounded-2xl font-bold text-sm hover:bg-gray-900 transition whitespace-nowrap shadow-sm shrink-0">
-                            ตรวจสอบ
+                    <div id="profileCard" class="hidden animate-fade-in-up bg-gradient-to-br from-gray-50 to-white p-5 rounded-[1.5rem] border border-gray-200 shadow-sm text-center transform transition-all duration-300">
+                        <div class="flex flex-col items-center justify-center">
+                            <div class="relative mb-3">
+                                <img id="displayProfilePic" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md">
+                                <div class="absolute bottom-0 right-0 bg-green-500 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center">
+                                    <span class="text-white text-xs font-bold">✓</span>
+                                </div>
+                            </div>
+                            <h3 id="displayFullName" class="text-lg font-bold text-gray-800 mb-1">...</h3>
+                            <div class="bg-blue-50 text-blue-700 px-4 py-1 rounded-full text-sm font-bold mb-2">
+                                รหัสพนักงาน: <span id="displayEmpId">...</span>
+                            </div>
+                            <p class="text-sm text-gray-600">แผนก: <span id="displayDept" class="font-medium text-gray-800">...</span></p>
+                        </div>
+                    </div>
+
+                    <div id="manualIdContainer" class="hidden flex flex-col gap-2">
+                        <label class="text-sm font-bold text-gray-700 ml-1">รหัสพนักงาน (ไม่พบข้อมูลจาก LINE)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="inpEmpId" class="flex-1 px-4 py-3 border rounded-2xl focus:ring-2 focus:ring-orange-400 outline-none transition text-sm bg-gray-50" placeholder="กรุณากรอกรหัสพนักงาน...">
+                            <button onclick="verifyManualId()" id="btnVerifyEmp" class="bg-gray-800 text-white px-4 py-2 rounded-2xl font-bold text-sm hover:bg-gray-900 transition whitespace-nowrap shadow-sm shrink-0">
+                                ตรวจสอบ
+                            </button>
+                        </div>
+                        <p id="manualVerifyMsg" class="text-xs min-h-[1rem] ml-1 text-red-500"></p>
+                    </div>
+
+                    <div id="registerContainer" class="hidden flex flex-col gap-4 animate-fade-in-up">
+                        <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium flex items-center shadow-inner">
+                            <span class="mr-2 text-lg">⚠️</span> ไม่พบข้อมูลในระบบ กรุณาลงทะเบียน
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-gray-700 ml-1">รหัสพนักงาน</label>
+                            <input type="text" id="inpRegEmpId" class="w-full px-4 py-3 border border-gray-200 bg-gray-100 rounded-2xl outline-none text-sm text-gray-500" readonly>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-gray-700 ml-1">ชื่อ-นามสกุล (ภาษาไทย)</label>
+                            <input type="text" id="inpRegName" class="w-full px-4 py-3 border border-blue-200 rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none transition text-sm" placeholder="เช่น สมชาย ใจดี">
+                        </div>
+                        <button onclick="registerNewUser()" id="btnRegister" class="w-full bg-blue-600 text-white py-3.5 rounded-2xl font-bold shadow-md hover:bg-blue-700 transition transform active:scale-95">
+                            บันทึกข้อมูลและเข้าสอบ
                         </button>
                     </div>
-                    <p id="manualVerifyMsg" class="text-xs min-h-[1rem] ml-1 text-red-500"></p>
-                </div>
-
-                <div id="registerContainer" class="hidden space-y-4 animate-fade-in-up">
-                    <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium flex items-center shadow-inner">
-                        <span class="mr-2 text-lg">⚠️</span> ไม่พบข้อมูลในระบบ กรุณาลงทะเบียน
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-sm font-bold text-gray-700 ml-1">รหัสพนักงาน</label>
-                        <input type="text" id="inpRegEmpId" class="w-full px-4 py-3 border border-gray-200 bg-gray-100 rounded-2xl outline-none text-sm text-gray-500" readonly>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-sm font-bold text-gray-700 ml-1">ชื่อ-นามสกุล (ภาษาไทย)</label>
-                        <input type="text" id="inpRegName" class="w-full px-4 py-3 border border-blue-200 rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none transition text-sm" placeholder="เช่น สมชาย ใจดี">
-                    </div>
-                    <button onclick="registerNewUser()" id="btnRegister" class="w-full bg-blue-600 text-white py-3.5 rounded-2xl font-bold shadow-md hover:bg-blue-700 transition transform active:scale-95">
-                        บันทึกข้อมูลและเข้าสอบ
-                    </button>
                 </div>
 
                 <div class="bg-gray-50 p-5 rounded-[1.5rem] text-sm text-gray-600 grid grid-cols-3 gap-2 text-center border border-gray-100 mt-2">
@@ -122,11 +124,11 @@
                     <div><span class="block text-xs text-gray-400">เกณฑ์ผ่าน</span><b id="lblPassScore" class="text-gray-700 text-lg">-%</b></div>
                 </div>
 
-                <button id="btnStart" onclick="startQuizNow()" disabled class="w-full bg-gray-300 text-white py-4 rounded-[1.5rem] font-bold shadow transition cursor-not-allowed transform active:scale-95 mt-4">
+                <button id="btnStart" onclick="startQuizNow()" disabled class="w-full bg-gray-300 text-white py-4 rounded-[1.5rem] font-bold shadow transition cursor-not-allowed transform active:scale-95">
                     รอการยืนยันตัวตน...
                 </button>
 
-                <div class="mt-6 pt-5 border-t border-gray-100 flex items-center justify-center gap-4">
+                <div class="mt-2 pt-5 border-t border-gray-100 flex items-center justify-center gap-4">
                     <img src="https://img2.pic.in.th/True--C.png" class="h-10 w-auto">
                     <div class="text-left">
                         <p class="text-xs text-gray-600 font-bold">พัฒนาระบบ Channel Communication</p>
@@ -226,7 +228,7 @@
 
     <script>
         // ==========================================
-        // ตั้งค่า API (⚠️ แก้ไขให้ตรงของคุณ)
+        // ตั้งค่า API เรียบร้อยแล้ว
         // ==========================================
         const LIFF_ID = "1656846002-0dy88v15"; 
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx6Qq3EJQ41GWV5wzK3_h8rSjpZkvUVl7GHXIEJ2zdl-Iu5GyUBMOJDJud5ywMe1z5lZQ/exec"; 
@@ -248,7 +250,7 @@
         let state = { settings: null, questions: [], answers: [], currIdx: 0, timer: null, timeLeft: 0, user: {} };
         let startTime, endTime;
         let userLinePic = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; 
-        let currentLineUid = ""; // ตัวแปรเก็บ LINE ID ตลอดการทำงาน
+        let currentLineUid = ""; 
 
         // --- Init & Auto Verify ---
         window.onload = async () => { 
@@ -269,8 +271,7 @@
                     if (liff.isLoggedIn()) {
                         const profile = await liff.getProfile();
                         userLinePic = profile.pictureUrl || userLinePic;
-                        currentLineUid = profile.userId; // เก็บ ID ไว้
-                        
+                        currentLineUid = profile.userId;
                         executeAutoVerify(currentLineUid);
                     } else {
                         liff.login();
@@ -315,11 +316,8 @@
             }
         }
 
-        function alertErr(e) { 
-            document.getElementById('loadingText').innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อ";
-        }
+        function alertErr(e) { document.getElementById('loadingText').innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อ"; }
 
-        // --- Logic 1: Auto Verify (ตรวจสอบ LINE ID) ---
         function executeAutoVerify(lineUid) {
             fetchGAS('getEmployeeByLineId', [lineUid]).then(res => {
                 const autoCont = document.getElementById('autoVerifyContainer');
@@ -337,31 +335,28 @@
                     autoCont.classList.add('hidden');
                     profCard.classList.remove('hidden');
                     
-                    startBtn.disabled = false;
-                    startBtn.innerText = "เริ่มทำแบบทดสอบ";
+                    startBtn.disabled = false; startBtn.innerText = "เริ่มทำแบบทดสอบ";
                     startBtn.className = "w-full bg-green-500 text-white py-4 rounded-[1.5rem] font-bold shadow hover:bg-green-600 hover:-translate-y-1 transition transform cursor-pointer mt-4";
                 } else {
-                    // ไม่พบ LINE ID ในระบบ -> โชว์ฟอร์มกรอกรหัสพนักงาน
                     autoCont.classList.add('hidden');
                     manCont.classList.remove('hidden');
                 }
             }).catch(alertErr);
         }
 
-        // --- Logic 2: Manual Verify (ค้นหาด้วยรหัสพนักงาน พร้อมส่ง LINE ID ไปผูกอัตโนมัติ) ---
         function verifyManualId() {
+            if (document.activeElement) document.activeElement.blur();
+            
             const empIdInput = document.getElementById('inpEmpId').value.trim();
             if(!empIdInput) { alert("กรุณากรอกรหัสพนักงาน"); return; }
             
             const btn = document.getElementById('btnVerifyEmp');
             btn.innerText = "..."; btn.disabled = true;
 
-            // ส่งข้อมูล 2 อย่าง: รหัสที่พิมพ์ + LINE UID ที่ดึงมา
             fetchGAS('getEmployeeByEmpId', [empIdInput, currentLineUid]).then(res => {
                 btn.innerText = "ตรวจสอบ"; btn.disabled = false;
                 
                 if (res.found) {
-                    // ถ้าเจอ รหัสพนักงาน (ระบบหลังบ้านบันทึก LINE ID ให้แล้ว) -> โชว์การ์ดโปรไฟล์
                     state.user = { id: res.id, name: res.name, dept: res.department };
                     document.getElementById('displayProfilePic').src = userLinePic; 
                     document.getElementById('displayFullName').innerText = res.name;
@@ -372,20 +367,19 @@
                     document.getElementById('profileCard').classList.remove('hidden');
                     
                     const startBtn = document.getElementById('btnStart');
-                    startBtn.disabled = false;
-                    startBtn.innerText = "เริ่มทำแบบทดสอบ";
+                    startBtn.disabled = false; startBtn.innerText = "เริ่มทำแบบทดสอบ";
                     startBtn.className = "w-full bg-green-500 text-white py-4 rounded-[1.5rem] font-bold shadow hover:bg-green-600 hover:-translate-y-1 transition transform cursor-pointer mt-4";
                 } else {
-                    // ถ้ารหัสพนักงานก็ไม่เจออีก -> โชว์หน้าลงทะเบียน
                     document.getElementById('manualIdContainer').classList.add('hidden');
                     document.getElementById('registerContainer').classList.remove('hidden');
-                    document.getElementById('inpRegEmpId').value = empIdInput; // ดึงรหัสที่พิมพ์มาใส่ให้เลย
+                    document.getElementById('inpRegEmpId').value = empIdInput; 
                 }
             }).catch(() => { btn.innerText = "ตรวจสอบ"; btn.disabled = false; });
         }
 
-        // --- Logic 3: Register New User (บันทึกพนักงานใหม่ลงชีทอัตโนมัติ) ---
         function registerNewUser() {
+            if (document.activeElement) document.activeElement.blur();
+            
             const regEmpId = document.getElementById('inpRegEmpId').value.trim();
             const regName = document.getElementById('inpRegName').value.trim();
             
@@ -394,13 +388,11 @@
             const btn = document.getElementById('btnRegister');
             btn.innerText = "กำลังบันทึกข้อมูล..."; btn.disabled = true;
 
-            // ส่งข้อมูล 3 อย่าง: รหัส, ชื่อ, LINE ID
             fetchGAS('registerEmployee', [regEmpId, regName, currentLineUid]).then(res => {
                 btn.innerText = "บันทึกข้อมูลและเข้าสอบ"; btn.disabled = false;
                 
                 if(res.found) {
                     state.user = { id: res.id, name: res.name, dept: res.department };
-                    
                     document.getElementById('displayProfilePic').src = userLinePic; 
                     document.getElementById('displayFullName').innerText = res.name;
                     document.getElementById('displayEmpId').innerText = res.id;
@@ -410,8 +402,7 @@
                     document.getElementById('profileCard').classList.remove('hidden');
                     
                     const startBtn = document.getElementById('btnStart');
-                    startBtn.disabled = false;
-                    startBtn.innerText = "เริ่มทำแบบทดสอบ";
+                    startBtn.disabled = false; startBtn.innerText = "เริ่มทำแบบทดสอบ";
                     startBtn.className = "w-full bg-green-500 text-white py-4 rounded-[1.5rem] font-bold shadow hover:bg-green-600 hover:-translate-y-1 transition transform cursor-pointer mt-4";
                 } else {
                     alert("เกิดข้อผิดพลาดในการลงทะเบียน: " + res.error);
@@ -419,7 +410,6 @@
             }).catch(alertErr);
         }
 
-        // --- Logic: Start Quiz ---
         function startQuizNow() {
             if(!state.user.id) return;
             document.getElementById('loadingOverlay').classList.remove('hidden');
@@ -435,7 +425,6 @@
             }).catch(alertErr);
         }
 
-        // --- Logic: Quiz Flow (เงื่อนไขและฟังก์ชันเดิม 100%) ---
         function setupQuizUI() {
             document.getElementById('loadingOverlay').classList.add('hidden');
             document.getElementById('loginScreen').classList.add('hidden');
@@ -443,20 +432,12 @@
             document.getElementById('quizScreen').classList.add('flex');
             document.getElementById('quizTakerName').innerText = state.user.name;
 
-            state.timeLeft = state.settings.timeLimitMinutes * 60;
-            startTime = new Date();
+            state.timeLeft = state.settings.timeLimitMinutes * 60; startTime = new Date();
             updateTimer();
-            state.timer = setInterval(() => {
-                state.timeLeft--; updateTimer();
-                if(state.timeLeft <= 0) submitQuiz(true);
-            }, 1000);
+            state.timer = setInterval(() => { state.timeLeft--; updateTimer(); if(state.timeLeft <= 0) submitQuiz(true); }, 1000);
 
-            const map = document.getElementById('questionMap');
-            map.innerHTML = '';
-            state.questions.forEach((_, i) => {
-                map.innerHTML += `<button id="map-${i}" onclick="jump(${i})" class="w-8 h-8 rounded bg-white border text-gray-500 text-sm hover:border-indigo-400 transition">${i+1}</button>`;
-            });
-
+            const map = document.getElementById('questionMap'); map.innerHTML = '';
+            state.questions.forEach((_, i) => { map.innerHTML += `<button id="map-${i}" onclick="jump(${i})" class="w-8 h-8 rounded bg-white border text-gray-500 text-sm hover:border-indigo-400 transition">${i+1}</button>`; });
             renderQuestion();
         }
 
@@ -468,27 +449,18 @@
         }
 
         function renderQuestion() {
-            const q = state.questions[state.currIdx];
-            const container = document.getElementById('questionContainer');
+            const q = state.questions[state.currIdx]; const container = document.getElementById('questionContainer');
             container.classList.remove('animate-fade-in-up'); void container.offsetWidth; container.classList.add('animate-fade-in-up');
-
             document.getElementById('currQNum').innerText = state.currIdx + 1;
             document.getElementById('qText').innerHTML = q.question;
             document.getElementById('progressBar').style.width = `${((state.currIdx + 1) / state.questions.length) * 100}%`;
-
-            const cCont = document.getElementById('choiceContainer');
-            cCont.innerHTML = '';
+            const cCont = document.getElementById('choiceContainer'); cCont.innerHTML = '';
             q.options.forEach((opt, i) => {
                 const isSel = state.answers[state.currIdx] === i;
-                cCont.innerHTML += `
-                    <div onclick="sel(${i})" class="p-4 border rounded-xl cursor-pointer flex items-center transition transform active:scale-[0.99] ${isSel ? 'border-white bg-green-600 shadow-sm' : 'border-white hover:bg-green-600 hover:border-gray-300 group'}">
-                        <div class="w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center transition ${isSel ? 'border-white bg-white' : 'border-gray-300 group-hover:border-white'}">
-                            ${isSel ? '<div class="w-3 h-3 bg-green-600 rounded-full"></div>' : ''}
-                        </div>
-                        <span class="${isSel ? 'text-white font-medium' : 'text-gray-600 group-hover:text-white'} text-lg">${opt}</span>
-                    </div>`;
+                cCont.innerHTML += `<div onclick="sel(${i})" class="p-4 border rounded-xl cursor-pointer flex items-center transition transform active:scale-[0.99] ${isSel ? 'border-white bg-green-600 shadow-sm' : 'border-white hover:bg-green-600 hover:border-gray-300 group'}">
+                        <div class="w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center transition ${isSel ? 'border-white bg-white' : 'border-gray-300 group-hover:border-white'}">${isSel ? '<div class="w-3 h-3 bg-green-600 rounded-full"></div>' : ''}</div>
+                        <span class="${isSel ? 'text-white font-medium' : 'text-gray-600 group-hover:text-white'} text-lg">${opt}</span></div>`;
             });
-
             document.getElementById('btnPrev').disabled = state.currIdx === 0;
             document.getElementById('btnNext').innerText = state.currIdx === state.questions.length - 1 ? 'ส่งคำตอบ' : 'ถัดไป';
             updateMap();
@@ -497,11 +469,8 @@
         function sel(idx) { state.answers[state.currIdx] = idx; renderQuestion(); }
         function jump(i) { state.currIdx = i; renderQuestion(); }
         function nav(dir) {
-            if (dir === 1 && state.currIdx >= state.questions.length - 1) {
-                if(confirm("ยืนยันการส่งคำตอบ?")) { submitQuiz(false); } return;
-            } 
-            const newIdx = state.currIdx + dir;
-            if(newIdx >= 0 && newIdx < state.questions.length) { state.currIdx = newIdx; renderQuestion(); }
+            if (dir === 1 && state.currIdx >= state.questions.length - 1) { if(confirm("ยืนยันการส่งคำตอบ?")) { submitQuiz(false); } return; } 
+            const newIdx = state.currIdx + dir; if(newIdx >= 0 && newIdx < state.questions.length) { state.currIdx = newIdx; renderQuestion(); }
         }
 
         function updateMap() {
@@ -509,67 +478,46 @@
                 const el = document.getElementById(`map-${i}`);
                 if(ans !== null) el.className = "w-8 h-8 rounded bg-gray-700 text-white text-sm font-bold shadow-sm transition transform scale-105";
                 else el.className = "w-8 h-8 rounded bg-white border text-gray-500 text-sm hover:border-gray-400 transition";
-                if(i === state.currIdx) el.classList.add('ring-2', 'ring-gray-300', 'ring-offset-1');
-                else el.classList.remove('ring-2', 'ring-gray-300', 'ring-offset-1');
+                if(i === state.currIdx) el.classList.add('ring-2', 'ring-gray-300', 'ring-offset-1'); else el.classList.remove('ring-2', 'ring-gray-300', 'ring-offset-1');
             });
         }
 
-        // --- Logic: Submit & Score (เงื่อนไขและฟังก์ชันเดิม 100%) ---
         function submitQuiz(auto) {
             clearInterval(state.timer); document.getElementById('loadingOverlay').classList.remove('hidden');
             endTime = new Date(); let score = 0; let incorrectIndices = []; let detailedLog = [];
-
             state.questions.forEach((q, i) => {
-                const isCorrect = state.answers[i] === q.correct;
-                if(isCorrect) score++; else incorrectIndices.push(i);
-
-                const tempDiv = document.createElement("div"); tempDiv.innerHTML = q.question;
-                const cleanQ = (tempDiv.textContent || "").substring(0, 40) + "...";
-                const uAns = state.answers[i] !== null ? q.options[state.answers[i]] : "ไม่ได้ตอบ";
-                const cAns = q.options[q.correct];
-                
+                const isCorrect = state.answers[i] === q.correct; if(isCorrect) score++; else incorrectIndices.push(i);
+                const tempDiv = document.createElement("div"); tempDiv.innerHTML = q.question; const cleanQ = (tempDiv.textContent || "").substring(0, 40) + "...";
+                const uAns = state.answers[i] !== null ? q.options[state.answers[i]] : "ไม่ได้ตอบ"; const cAns = q.options[q.correct];
                 let logText = `${isCorrect ? "✅" : "🅧"} [ข้อ ${i+1}] ${cleanQ}\n   ตอบ: ${uAns}`;
                 if(!isCorrect) logText += `\n   (เฉลย: ${cAns})`; detailedLog.push(logText);
             });
-
-            const pct = Math.round((score / state.questions.length) * 100);
-            const passed = pct >= state.settings.passingPercentage;
-            const durationSec = Math.floor((endTime - startTime)/1000);
-            const durationStr = `${Math.floor(durationSec/60)}:${(durationSec%60).toString().padStart(2,'0')}`;
-
+            const pct = Math.round((score / state.questions.length) * 100); const passed = pct >= state.settings.passingPercentage;
+            const durationSec = Math.floor((endTime - startTime)/1000); const durationStr = `${Math.floor(durationSec/60)}:${(durationSec%60).toString().padStart(2,'0')}`;
             const result = {
                 studentId: state.user.id, fullName: state.user.name, score: score, totalQuestions: state.questions.length,
                 percentage: pct, grade: passed ? "ผ่าน" : "ไม่ผ่าน", duration: durationStr, answerLog: detailedLog.join('\n----------------\n')
             };
-
-            fetchGAS('saveQuizResult', [result])
-                .then(() => showResult(result, passed, incorrectIndices))
+            fetchGAS('saveQuizResult', [result]).then(() => showResult(result, passed, incorrectIndices))
                 .catch((err) => { document.getElementById('loadingOverlay').classList.add('hidden'); alert("เกิดข้อผิดพลาดในการส่งคำตอบ: " + err.message + "\nกรุณาลองใหม่อีกครั้ง"); });
         }
 
         function showResult(res, passed, incorrectIndices) {
-            document.getElementById('loadingOverlay').classList.add('hidden');
-            const modal = document.getElementById('resultModal');
+            document.getElementById('loadingOverlay').classList.add('hidden'); const modal = document.getElementById('resultModal');
             modal.classList.remove('hidden'); modal.classList.add('flex');
-
             document.getElementById('resIcon').innerText = passed ? "🏆" : "💪";
             document.getElementById('resGrade').innerText = passed ? "ยินดีด้วย! คุณผ่านเกณฑ์" : "พยายามอีกนิด คุณยังไม่ผ่านเกณฑ์";
             document.getElementById('resGrade').className = passed ? "text-lg font-bold mb-6 text-green-600" : "text-lg font-bold mb-6 text-red-500";
-            document.getElementById('resScore').innerText = `${res.score}/${res.totalQuestions}`;
-            document.getElementById('resName').innerText = res.fullName;
-            document.getElementById('resTime').innerText = res.duration;
-            document.getElementById('resPercent').innerText = res.percentage + "%";
-
+            document.getElementById('resScore').innerText = `${res.score}/${res.totalQuestions}`; document.getElementById('resName').innerText = res.fullName;
+            document.getElementById('resTime').innerText = res.duration; document.getElementById('resPercent').innerText = res.percentage + "%";
             const reviewSection = document.getElementById('reviewSection'); const reviewContent = document.getElementById('reviewContent');
             if (incorrectIndices.length > 0) {
                 reviewSection.classList.remove('hidden'); reviewContent.innerHTML = ''; 
                 incorrectIndices.forEach(idx => {
                     const q = state.questions[idx]; const userAnsIdx = state.answers[idx];
                     const userAnsText = userAnsIdx !== null ? q.options[userAnsIdx] : "ไม่ได้ตอบ"; const correctAnsText = q.options[q.correct];
-                    const tempDiv = document.createElement("div"); tempDiv.innerHTML = q.question;
-                    const questionText = tempDiv.textContent || tempDiv.innerText || "";
-                    const item = document.createElement('div');
-                    item.className = "bg-gray-50 rounded-xl p-4 border border-gray-200 text-sm hover:shadow-sm transition";
+                    const tempDiv = document.createElement("div"); tempDiv.innerHTML = q.question; const questionText = tempDiv.textContent || tempDiv.innerText || "";
+                    const item = document.createElement('div'); item.className = "bg-gray-50 rounded-xl p-4 border border-gray-200 text-sm hover:shadow-sm transition";
                     item.innerHTML = `<div class="font-bold text-gray-700 mb-2 border-b pb-2 border-gray-200"><span class="text-red-500 mr-1">ข้อที่ ${idx + 1}:</span> ${questionText}</div>
                         <div class="space-y-1"><div class="text-red-600 flex items-start bg-red-50 p-1 rounded"><span class="mr-2 min-w-[60px] font-bold">🅧 ตอบ:</span> <span>${userAnsText}</span></div>
                         <div class="text-green-600 flex items-start bg-green-50 p-1 rounded"><span class="mr-2 min-w-[60px] font-bold">✅ ถูก:</span> <span>${correctAnsText}</span></div></div>`;
@@ -579,11 +527,8 @@
         }
 
         function openLeaderboard() {
-            const modal = document.getElementById('leaderboardModal');
-            const top3Cont = document.getElementById('top3Container'); const listCont = document.getElementById('listContainer'); const loading = document.getElementById('lbLoading');
-            modal.classList.remove('hidden'); modal.classList.add('flex');
-            top3Cont.innerHTML = ''; listCont.innerHTML = ''; top3Cont.classList.add('hidden'); listCont.classList.add('hidden'); loading.classList.remove('hidden');
-
+            const modal = document.getElementById('leaderboardModal'); const top3Cont = document.getElementById('top3Container'); const listCont = document.getElementById('listContainer'); const loading = document.getElementById('lbLoading');
+            modal.classList.remove('hidden'); modal.classList.add('flex'); top3Cont.innerHTML = ''; listCont.innerHTML = ''; top3Cont.classList.add('hidden'); listCont.classList.add('hidden'); loading.classList.remove('hidden');
             fetchGAS('getTopTenScores').then(data => {
                 loading.classList.add('hidden');
                 if (data.length === 0) { listCont.innerHTML = '<div class="text-center text-gray-400 py-10">ยังไม่มีผู้กล้าในทำเนียบ</div>'; listCont.classList.remove('hidden'); return; }
