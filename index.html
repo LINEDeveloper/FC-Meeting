@@ -99,6 +99,23 @@
                     <p id="manualVerifyMsg" class="text-xs min-h-[1rem] ml-1 text-red-500"></p>
                 </div>
 
+                <div id="registerContainer" class="hidden space-y-4 animate-fade-in-up">
+                    <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium flex items-center shadow-inner">
+                        <span class="mr-2 text-lg">⚠️</span> ไม่พบข้อมูลในระบบ กรุณาลงทะเบียน
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-gray-700 ml-1">รหัสพนักงาน</label>
+                        <input type="text" id="inpRegEmpId" class="w-full px-4 py-3 border border-gray-200 bg-gray-100 rounded-2xl outline-none text-sm text-gray-500" readonly>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-gray-700 ml-1">ชื่อ-นามสกุล (ภาษาไทย)</label>
+                        <input type="text" id="inpRegName" class="w-full px-4 py-3 border border-blue-200 rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none transition text-sm" placeholder="เช่น สมชาย ใจดี">
+                    </div>
+                    <button onclick="registerNewUser()" id="btnRegister" class="w-full bg-blue-600 text-white py-3.5 rounded-2xl font-bold shadow-md hover:bg-blue-700 transition transform active:scale-95">
+                        บันทึกข้อมูลและเข้าสอบ
+                    </button>
+                </div>
+
                 <div class="bg-gray-50 p-5 rounded-[1.5rem] text-sm text-gray-600 grid grid-cols-3 gap-2 text-center border border-gray-100 mt-2">
                     <div><span class="block text-xs text-gray-400">จำนวนข้อ</span><b id="lblTotalQ" class="text-gray-700 text-lg">-</b></div>
                     <div><span class="block text-xs text-gray-400">เวลา (นาที)</span><b id="lblTime" class="text-gray-700 text-lg">-</b></div>
@@ -209,7 +226,7 @@
 
     <script>
         // ==========================================
-        // ตั้งค่า API (แก้ไข 2 บรรทัดนี้)
+        // ตั้งค่า API (⚠️ แก้ไขให้ตรงของคุณ)
         // ==========================================
         const LIFF_ID = "1656846002-0dy88v15"; 
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx6Qq3EJQ41GWV5wzK3_h8rSjpZkvUVl7GHXIEJ2zdl-Iu5GyUBMOJDJud5ywMe1z5lZQ/exec"; 
@@ -231,6 +248,7 @@
         let state = { settings: null, questions: [], answers: [], currIdx: 0, timer: null, timeLeft: 0, user: {} };
         let startTime, endTime;
         let userLinePic = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; 
+        let currentLineUid = ""; // ตัวแปรเก็บ LINE ID ตลอดการทำงาน
 
         // --- Init & Auto Verify ---
         window.onload = async () => { 
@@ -243,20 +261,17 @@
             }, 10000);
 
             try {
-                // 1. โหลดข้อมูลแบบทดสอบ (วันที่, เวลา)
                 const settings = await fetchGAS('getQuizSettings');
                 initData(settings);
 
-                // 2. ถ้าเวลาอยู่ในช่วงให้เข้าสอบได้ -> เรียก LIFF เพื่อดึง LINE ID
                 if (!document.getElementById('loginScreen').classList.contains('hidden')) {
                     await liff.init({ liffId: LIFF_ID }); 
                     if (liff.isLoggedIn()) {
                         const profile = await liff.getProfile();
                         userLinePic = profile.pictureUrl || userLinePic;
-                        const lineUid = profile.userId;
+                        currentLineUid = profile.userId; // เก็บ ID ไว้
                         
-                        // 3. เริ่มตรวจสอบอัตโนมัติ
-                        executeAutoVerify(lineUid);
+                        executeAutoVerify(currentLineUid);
                     } else {
                         liff.login();
                     }
@@ -304,7 +319,7 @@
             document.getElementById('loadingText').innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อ";
         }
 
-        // --- Logic: Auto Verify ---
+        // --- Logic 1: Auto Verify (ตรวจสอบ LINE ID) ---
         function executeAutoVerify(lineUid) {
             fetchGAS('getEmployeeByLineId', [lineUid]).then(res => {
                 const autoCont = document.getElementById('autoVerifyContainer');
@@ -313,9 +328,7 @@
                 const startBtn = document.getElementById('btnStart');
 
                 if (res.found) {
-                    // ตรวจสอบผ่าน -> โชว์การ์ด
                     state.user = { id: res.id, name: res.name, dept: res.department };
-                    
                     document.getElementById('displayProfilePic').src = userLinePic;
                     document.getElementById('displayFullName').innerText = res.name;
                     document.getElementById('displayEmpId').innerText = res.id;
@@ -328,14 +341,14 @@
                     startBtn.innerText = "เริ่มทำแบบทดสอบ";
                     startBtn.className = "w-full bg-green-500 text-white py-4 rounded-[1.5rem] font-bold shadow hover:bg-green-600 hover:-translate-y-1 transition transform cursor-pointer mt-4";
                 } else {
-                    // ถ้าไม่พบ LINE ID ในฐานข้อมูล -> โชว์ช่องให้กรอกรหัสพนักงานแทน
+                    // ไม่พบ LINE ID ในระบบ -> โชว์ฟอร์มกรอกรหัสพนักงาน
                     autoCont.classList.add('hidden');
                     manCont.classList.remove('hidden');
                 }
             }).catch(alertErr);
         }
 
-        // --- Logic: Manual Fallback (กรณีคนไม่ได้ผูก LINE ให้กรอกแค่รหัสพนักงาน) ---
+        // --- Logic 2: Manual Verify (ค้นหาด้วยรหัสพนักงาน พร้อมส่ง LINE ID ไปผูกอัตโนมัติ) ---
         function verifyManualId() {
             const empIdInput = document.getElementById('inpEmpId').value.trim();
             if(!empIdInput) { alert("กรุณากรอกรหัสพนักงาน"); return; }
@@ -343,13 +356,14 @@
             const btn = document.getElementById('btnVerifyEmp');
             btn.innerText = "..."; btn.disabled = true;
 
-            fetchGAS('getEmployeeByEmpId', [empIdInput]).then(res => {
+            // ส่งข้อมูล 2 อย่าง: รหัสที่พิมพ์ + LINE UID ที่ดึงมา
+            fetchGAS('getEmployeeByEmpId', [empIdInput, currentLineUid]).then(res => {
                 btn.innerText = "ตรวจสอบ"; btn.disabled = false;
                 
                 if (res.found) {
+                    // ถ้าเจอ รหัสพนักงาน (ระบบหลังบ้านบันทึก LINE ID ให้แล้ว) -> โชว์การ์ดโปรไฟล์
                     state.user = { id: res.id, name: res.name, dept: res.department };
-                    
-                    document.getElementById('displayProfilePic').src = userLinePic; // รูปจาก LINE อยู่ดี
+                    document.getElementById('displayProfilePic').src = userLinePic; 
                     document.getElementById('displayFullName').innerText = res.name;
                     document.getElementById('displayEmpId').innerText = res.id;
                     document.getElementById('displayDept').innerText = res.department;
@@ -362,14 +376,52 @@
                     startBtn.innerText = "เริ่มทำแบบทดสอบ";
                     startBtn.className = "w-full bg-green-500 text-white py-4 rounded-[1.5rem] font-bold shadow hover:bg-green-600 hover:-translate-y-1 transition transform cursor-pointer mt-4";
                 } else {
-                    document.getElementById('manualVerifyMsg').innerText = "🅧 ไม่พบรหัสพนักงานนี้ กรุณาตรวจสอบอีกครั้ง";
+                    // ถ้ารหัสพนักงานก็ไม่เจออีก -> โชว์หน้าลงทะเบียน
+                    document.getElementById('manualIdContainer').classList.add('hidden');
+                    document.getElementById('registerContainer').classList.remove('hidden');
+                    document.getElementById('inpRegEmpId').value = empIdInput; // ดึงรหัสที่พิมพ์มาใส่ให้เลย
                 }
             }).catch(() => { btn.innerText = "ตรวจสอบ"; btn.disabled = false; });
         }
 
+        // --- Logic 3: Register New User (บันทึกพนักงานใหม่ลงชีทอัตโนมัติ) ---
+        function registerNewUser() {
+            const regEmpId = document.getElementById('inpRegEmpId').value.trim();
+            const regName = document.getElementById('inpRegName').value.trim();
+            
+            if(!regEmpId || !regName) { alert('กรุณากรอกชื่อ-นามสกุลให้ครบถ้วน'); return; }
+            
+            const btn = document.getElementById('btnRegister');
+            btn.innerText = "กำลังบันทึกข้อมูล..."; btn.disabled = true;
+
+            // ส่งข้อมูล 3 อย่าง: รหัส, ชื่อ, LINE ID
+            fetchGAS('registerEmployee', [regEmpId, regName, currentLineUid]).then(res => {
+                btn.innerText = "บันทึกข้อมูลและเข้าสอบ"; btn.disabled = false;
+                
+                if(res.found) {
+                    state.user = { id: res.id, name: res.name, dept: res.department };
+                    
+                    document.getElementById('displayProfilePic').src = userLinePic; 
+                    document.getElementById('displayFullName').innerText = res.name;
+                    document.getElementById('displayEmpId').innerText = res.id;
+                    document.getElementById('displayDept').innerText = res.department;
+                    
+                    document.getElementById('registerContainer').classList.add('hidden');
+                    document.getElementById('profileCard').classList.remove('hidden');
+                    
+                    const startBtn = document.getElementById('btnStart');
+                    startBtn.disabled = false;
+                    startBtn.innerText = "เริ่มทำแบบทดสอบ";
+                    startBtn.className = "w-full bg-green-500 text-white py-4 rounded-[1.5rem] font-bold shadow hover:bg-green-600 hover:-translate-y-1 transition transform cursor-pointer mt-4";
+                } else {
+                    alert("เกิดข้อผิดพลาดในการลงทะเบียน: " + res.error);
+                }
+            }).catch(alertErr);
+        }
+
         // --- Logic: Start Quiz ---
         function startQuizNow() {
-            if(!state.user.id) return; // กันเหนียว
+            if(!state.user.id) return;
             document.getElementById('loadingOverlay').classList.remove('hidden');
             loadQuestions();
         }
