@@ -109,7 +109,7 @@
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                 </div>
                                 <div class="text-left">
-                                    <span class="block text-base">สรุปผลการสอบ</span>
+                                    <span class="block text-base flex items-center gap-2">สรุปผลการสอบ <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></span>
                                     <span class="block text-xs font-normal text-red-100 mt-0.5">คะแนนเฉลี่ย และผลการผ่านเกณฑ์</span>
                                 </div>
                             </button>
@@ -207,6 +207,18 @@
         }
 
         async function exportFile(actionName, args = []) {
+            // === ระบบความปลอดภัย: ตรวจสอบรหัสผ่านเฉพาะปุ่มสรุปผลสอบ ===
+            if (actionName === 'downloadResultsExcel') {
+                const password = prompt("กรุณากรอกรหัสผ่านเพื่อยืนยันการดาวน์โหลด (สรุปผลการสอบ):");
+                if (password !== "FC2026") {
+                    if (password !== null) { // แจ้งเตือนเมื่อกรอกผิด (ไม่แจ้งถ้ากด Cancel)
+                        alert("❌ รหัสผ่านไม่ถูกต้อง ไม่อนุญาตให้ดาวน์โหลดข้อมูล");
+                    }
+                    return; // ยกเลิกการดาวน์โหลดทันที
+                }
+            }
+            // =======================================================
+
             const btnId = actionName === 'downloadTrackingExcel' ? 'btnTrack' : 'btnResult';
             const btn = document.getElementById(btnId);
             const originalHtml = btn.innerHTML;
