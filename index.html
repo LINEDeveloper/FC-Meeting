@@ -9,17 +9,13 @@
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <style>
-        /* บังคับใช้ความสูงแบบ Dynamic Viewport (100dvh) แก้ปัญหาจอโดนตัดใน LINE */
         body { font-family: 'Sarabun', sans-serif; background-color: #f9fafb; -webkit-tap-highlight-color: transparent; }
-        
         .timer-urgent { animation: pulse 1s infinite; color: #ef4444; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
         @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
         .podium-enter { animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
@@ -33,7 +29,7 @@
             <div class="absolute animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
             <img src="https://img2.pic.in.th/True--C.png" class="h-8 w-auto opacity-90">
         </div>
-        <p id="loadingText" class="text-gray-600 font-bold animate-pulse tracking-wide">กำลังเตรียมระบบ...</p>
+        <p id="loadingText" class="text-gray-600 font-bold animate-pulse tracking-wide">กำลังโหลด...</p>
         <p id="errorText" class="text-red-500 text-sm mt-4 hidden">โหลดนานผิดปกติ? กรุณารีเฟรช หรือตรวจสอบสัญญาณเน็ต</p>
     </div>
 
@@ -73,8 +69,12 @@
                 
                 <div id="authDynamicArea" class="w-full">
                     <div id="autoVerifyContainer" class="flex flex-col items-center justify-center py-6 bg-blue-50 rounded-[1.5rem] border border-blue-100">
-                        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3"></div>
-                        <p class="text-sm font-bold text-blue-600 animate-pulse">กำลังตรวจสอบข้อมูล LINE ID...</p>
+                        <div class="relative flex items-center justify-center w-16 h-16 mb-3">
+                            <div class="absolute inset-0 rounded-full border-4 border-blue-200/50"></div>
+                            <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-red-500 border-r-red-500 animate-[spin_1s_linear_infinite]"></div>
+                            <img id="loadingProfilePic" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-12 h-12 rounded-full object-cover z-10 bg-white">
+                        </div>
+                        <p class="text-sm font-bold text-blue-600 animate-pulse">กำลังยืนยันข้อมูล...</p>
                     </div>
 
                     <div id="profileCard" class="hidden animate-fade-in-up bg-gradient-to-br from-gray-50 to-white p-5 rounded-[1.5rem] border border-gray-200 shadow-sm text-center">
@@ -154,7 +154,6 @@
                 <div id="timerDisplay" class="text-xl font-mono text-white font-bold">00:00</div>
             </div>
         </div>
-        
         <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
             <div class="hidden md:block bg-gray-50 w-64 p-6 overflow-y-auto border-r border-gray-200 order-2 md:order-1">
                 <p class="text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider">ข้อสอบทั้งหมด</p>
@@ -232,9 +231,6 @@
     </div>
 
     <script>
-        // ==========================================
-        // ตั้งค่า API (ใส่ข้อมูลครบถ้วนแล้ว)
-        // ==========================================
         const LIFF_ID = "1656846002-0dy88v15"; 
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx6Qq3EJQ41GWV5wzK3_h8rSjpZkvUVl7GHXIEJ2zdl-Iu5GyUBMOJDJud5ywMe1z5lZQ/exec"; 
 
@@ -251,13 +247,11 @@
             }
         }
 
-        // --- State ---
         let state = { settings: null, questions: [], answers: [], currIdx: 0, timer: null, timeLeft: 0, user: {} };
         let startTime, endTime;
         let userLinePic = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; 
         let currentLineUid = ""; 
 
-        // --- Init & Auto Verify ---
         window.onload = async () => { 
             setTimeout(() => {
                 const overlay = document.getElementById('loadingOverlay');
@@ -277,6 +271,11 @@
                         const profile = await liff.getProfile();
                         userLinePic = profile.pictureUrl || userLinePic;
                         currentLineUid = profile.userId;
+                        
+                        // อัปเดตรูปในวงกลมโหลดทันทีที่ดึงได้
+                        const loadingPic = document.getElementById('loadingProfilePic');
+                        if (loadingPic) loadingPic.src = userLinePic;
+
                         executeAutoVerify(currentLineUid);
                     } else {
                         liff.login();
