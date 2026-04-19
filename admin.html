@@ -12,7 +12,6 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        /* Premium Soft Shadow */
         .premium-card { box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.04); border: 1px solid #f1f5f9; }
     </style>
 </head>
@@ -27,11 +26,26 @@
                 <p class="text-[11px] md:text-xs text-slate-500 font-medium tracking-wide mt-0.5">FC Meeting Quiz Overview</p>
             </div>
         </div>
-        <button onclick="loadDashboardData()" class="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 rounded-lg text-sm font-semibold transition-colors border border-slate-200 hover:border-red-200">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-            <span class="hidden md:inline">รีเฟรชข้อมูล</span>
-        </button>
+
+        <div class="flex items-center gap-4">
+            <div id="countdownContainer" class="hidden lg:flex flex-col items-end text-right">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">สิ้นสุดการสอบ: <span id="endDateDisplay" class="text-slate-600">-</span></p>
+                <div id="countdownDisplay" class="text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-md border border-red-100 shadow-sm min-w-[140px] text-center">
+                    กำลังคำนวณเวลา...
+                </div>
+            </div>
+
+            <button onclick="loadDashboardData()" class="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 rounded-lg text-sm font-semibold transition-colors border border-slate-200 hover:border-red-200 shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <span class="hidden md:inline">รีเฟรชข้อมูล</span>
+            </button>
+        </div>
     </header>
+
+    <div id="mobileCountdownContainer" class="lg:hidden bg-slate-50 border-b border-slate-200 px-6 py-2.5 flex justify-between items-center text-[11px] shrink-0 shadow-inner hidden">
+        <span class="text-slate-500 font-semibold">สิ้นสุด: <span id="mobEndDateDisplay" class="text-slate-700">-</span></span>
+        <span id="mobCountdownDisplay" class="text-red-600 font-bold bg-red-100 px-2 py-0.5 rounded shadow-sm tracking-wide">...</span>
+    </div>
 
     <main class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
         <div class="max-w-6xl mx-auto space-y-6 md:space-y-8 pb-10">
@@ -47,7 +61,6 @@
             <div id="dashboardContent" class="hidden space-y-6 md:space-y-8 animate-[fade-in-up_0.4s_ease-out]">
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                    
                     <div class="bg-white rounded-2xl p-6 premium-card flex items-start gap-4">
                         <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-600 shrink-0">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
@@ -86,7 +99,6 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
@@ -98,8 +110,7 @@
                                 <p class="text-xs text-slate-500 mt-1">Completion Progress by Channel</p>
                             </div>
                         </div>
-                        <div id="channelList" class="space-y-6">
-                            </div>
+                        <div id="channelList" class="space-y-6"></div>
                     </div>
 
                     <div class="bg-white rounded-2xl p-6 md:p-8 premium-card h-fit flex flex-col">
@@ -153,8 +164,8 @@
     </main>
 
     <script>
-        // ⚠️ โค้ดส่วน API และ Logic คงเดิม 100% ไม่มีการดัดแปลง
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx6Qq3EJQ41GWV5wzK3_h8rSjpZkvUVl7GHXIEJ2zdl-Iu5GyUBMOJDJud5ywMe1z5lZQ/exec"; 
+        let countdownInterval; // ตัวแปรสำหรับเก็บสถานะเวลานับถอยหลัง
 
         async function fetchGAS(action, args = []) {
             const response = await fetch(GAS_WEB_APP_URL, {
@@ -172,7 +183,11 @@
             document.getElementById('dashboardContent').classList.add('hidden');
 
             try {
-                const data = await fetchGAS('getAdminDashboardData');
+                // โหลดข้อมูล Dashboard และข้อมูลการตั้งค่า (Settings) ไปพร้อมๆ กัน
+                const [data, settings] = await Promise.all([
+                    fetchGAS('getAdminDashboardData'),
+                    fetchGAS('getQuizSettings')
+                ]);
                 
                 document.getElementById('valTested').innerText = data.totalTested.toLocaleString();
                 document.getElementById('valTarget').innerText = data.totalTarget.toLocaleString();
@@ -193,7 +208,6 @@
                 chArray.sort((a, b) => b.percent - a.percent);
 
                 chArray.forEach(ch => {
-                    // Progress Bar ดีไซน์เส้นบางเฉียบ (h-1.5) คลีนๆ สี True Red
                     channelContainer.innerHTML += `
                         <div>
                             <div class="flex justify-between items-end text-sm font-semibold text-slate-700 mb-2">
@@ -208,6 +222,9 @@
                     channelSelect.innerHTML += `<option value="${ch.name}">${ch.name}</option>`;
                 });
 
+                // เรียกใช้ฟังก์ชันนับถอยหลัง โดยส่ง EndDate ที่ได้จากระบบ
+                setupCountdown(settings.endDate);
+
                 document.getElementById('loadingState').classList.add('hidden');
                 document.getElementById('dashboardContent').classList.remove('hidden');
             } catch (err) {
@@ -216,13 +233,82 @@
             }
         }
 
+        // --- ฟังก์ชันใหม่: จัดการเวลานับถอยหลัง ---
+        function setupCountdown(endDateStr) {
+            if(countdownInterval) clearInterval(countdownInterval);
+            
+            const containerDesk = document.getElementById('countdownContainer');
+            const displayDesk = document.getElementById('countdownDisplay');
+            const dateDesk = document.getElementById('endDateDisplay');
+            
+            const containerMob = document.getElementById('mobileCountdownContainer');
+            const displayMob = document.getElementById('mobCountdownDisplay');
+            const dateMob = document.getElementById('mobEndDateDisplay');
+
+            if (!endDateStr) {
+                containerDesk.classList.remove('hidden');
+                containerMob.classList.remove('hidden');
+                dateDesk.innerText = 'ไม่มีกำหนด';
+                dateMob.innerText = 'ไม่มีกำหนด';
+                
+                const activeClass = 'text-xs font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-md border border-green-100 shadow-sm min-w-[140px] text-center';
+                displayDesk.innerText = 'เปิดระบบตลอดเวลา';
+                displayDesk.className = activeClass;
+                displayMob.innerText = 'เปิดตลอดเวลา';
+                displayMob.className = 'text-green-600 font-bold bg-green-100 px-2 py-0.5 rounded shadow-sm';
+                return;
+            }
+
+            const endDate = new Date(endDateStr);
+            containerDesk.classList.remove('hidden');
+            containerMob.classList.remove('hidden');
+            
+            // Format Date: DD/MM/YYYY HH:MM
+            const formattedDate = endDate.toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' });
+            dateDesk.innerText = formattedDate + ' น.';
+            dateMob.innerText = formattedDate + ' น.';
+
+            countdownInterval = setInterval(() => {
+                const now = new Date();
+                const diff = endDate - now;
+
+                if (diff <= 0) {
+                    clearInterval(countdownInterval);
+                    const endText = 'หมดเวลาทำแบบทดสอบ';
+                    const endClassDesk = 'text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200 shadow-sm min-w-[140px] text-center';
+                    const endClassMob = 'text-slate-600 font-bold bg-slate-200 px-2 py-0.5 rounded shadow-sm';
+                    
+                    displayDesk.innerText = endText;
+                    displayDesk.className = endClassDesk;
+                    displayMob.innerText = 'หมดเวลาสอบ';
+                    displayMob.className = endClassMob;
+                } else {
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const secs = Math.floor((diff % (1000 * 60)) / 1000);
+                    
+                    let timeStr = '';
+                    if(days > 0) timeStr += `${days} วัน `;
+                    timeStr += `${hours.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')} ชม.`;
+                    
+                    const activeClassDesk = 'text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-md border border-red-100 shadow-sm min-w-[140px] text-center tracking-wide';
+                    const activeClassMob = 'text-red-600 font-bold bg-red-100 px-2 py-0.5 rounded shadow-sm tracking-wide';
+
+                    displayDesk.innerText = `⏳ ${timeStr}`;
+                    displayDesk.className = activeClassDesk;
+                    displayMob.innerText = `⏳ ${timeStr}`;
+                    displayMob.className = activeClassMob;
+                }
+            }, 1000);
+        }
+
         function exportTracking() {
             const selectedChannel = document.getElementById('channelSelect').value;
             exportFile('downloadTrackingExcel', [selectedChannel]);
         }
 
         async function exportFile(actionName, args = []) {
-            // === ระบบรหัสผ่านยังอยู่เหมือนเดิม 100% ===
             if (actionName === 'downloadResultsExcel') {
                 const password = prompt("กรุณากรอกรหัสผ่านเพื่อยืนยันการดาวน์โหลด (สรุปผลการสอบ):");
                 if (password !== "FC2026") {
@@ -232,7 +318,6 @@
                     return; 
                 }
             }
-            // ===================================
 
             const btnId = actionName === 'downloadTrackingExcel' ? 'btnTrack' : 'btnResult';
             const btn = document.getElementById(btnId);
