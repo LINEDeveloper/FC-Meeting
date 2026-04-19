@@ -70,13 +70,13 @@
             <div class="p-6 md:p-8 flex flex-col gap-5 shrink-0">
                 
                 <div id="authDynamicArea" class="w-full">
-                    <div id="autoVerifyContainer" class="flex flex-col items-center justify-center py-6 bg-blue-50 rounded-[1.5rem] border border-blue-100">
-                        <div class="relative flex items-center justify-center w-16 h-16 mb-3">
+                    <div id="autoVerifyContainer" class="flex flex-col items-center justify-center py-8 bg-blue-50 rounded-[1.5rem] border border-blue-100">
+                        <div class="relative flex items-center justify-center w-20 h-20 mb-4">
                             <div class="absolute inset-0 rounded-full border-4 border-blue-200/50"></div>
                             <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-red-500 border-r-red-500 animate-[spin_1s_linear_infinite]"></div>
-                            <img id="loadingProfilePic" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-12 h-12 rounded-full object-cover z-10 bg-white">
+                            <img id="loadingProfilePic" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-16 h-16 rounded-full object-cover z-10 bg-white shadow-sm">
                         </div>
-                        <p class="text-sm font-bold text-blue-600 animate-pulse">กำลังยืนยันข้อมูล โปรดรอสักครู่...</p>
+                        <p class="text-[15px] font-bold text-blue-600 animate-pulse tracking-wide mt-1">กำลังยืนยันข้อมูล โปรดรอสักครู่...</p>
                     </div>
 
                     <div id="profileCard" class="hidden animate-fade-in-up bg-gradient-to-br from-gray-50 to-white p-5 rounded-[1.5rem] border border-gray-200 shadow-sm text-center">
@@ -255,14 +255,6 @@
         let currentLineUid = ""; 
 
         window.onload = async () => { 
-            setTimeout(() => {
-                const overlay = document.getElementById('loadingOverlay');
-                if (!overlay.classList.contains('hidden')) {
-                    document.getElementById('loadingText').innerText = "เชื่อมต่อนานผิดปกติ...";
-                    document.getElementById('errorText').classList.remove('hidden');
-                }
-            }, 10000);
-
             try {
                 const settings = await fetchGAS('getQuizSettings');
                 initData(settings);
