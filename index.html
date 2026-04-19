@@ -232,6 +232,17 @@
         </div>
     </div>
 
+    <div id="limitModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-[70] backdrop-blur-sm p-4 transition-opacity">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm p-8 text-center transform transition-all animate-fade-in-up border border-slate-100">
+            <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
+                <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-800 mb-2">สิทธิ์การสอบเต็มแล้ว</h3>
+            <p class="text-slate-500 text-sm mb-6 leading-relaxed">คุณได้ทำแบบทดสอบครบตามโควต้า <span id="limitCountText" class="font-bold text-red-600 text-base"></span> ครั้งที่ระบบกำหนดไว้แล้วครับ</p>
+            <button onclick="closeLimitModal()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95">รับทราบ</button>
+        </div>
+    </div>
+
     <script>
         const LIFF_ID = "1656846002-0dy88v15"; 
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx6Qq3EJQ41GWV5wzK3_h8rSjpZkvUVl7GHXIEJ2zdl-Iu5GyUBMOJDJud5ywMe1z5lZQ/exec"; 
@@ -414,10 +425,38 @@
             }).catch(alertErr);
         }
 
-        function startQuizNow() {
+        // 📌 ฟังก์ชันเริ่มทำแบบทดสอบ (เพิ่มระบบเช็คจำนวนครั้งโควต้า)
+        async function startQuizNow() {
             if(!state.user.id) return;
             document.getElementById('loadingOverlay').classList.remove('hidden');
-            loadQuestions();
+            
+            try {
+                // 1. ส่งไอดีพนักงานไปเช็คในระบบว่าสอบไปกี่ครั้งแล้ว
+                const res = await fetchGAS('checkUserAttempts', [state.user.id]);
+                const maxAttempts = parseInt(state.settings.maxAttempts) || 1; 
+                
+                // 2. ถ้าสอบเกินหรือเท่ากับโควต้า ให้บล็อกทันที
+                if (res.attempts >= maxAttempts) {
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                    document.getElementById('limitCountText').innerText = maxAttempts;
+                    document.getElementById('limitModal').classList.remove('hidden');
+                    document.getElementById('limitModal').classList.add('flex');
+                    return;
+                }
+                
+                // 3. ถ้ายังไม่เกินโควต้า ให้เข้าสอบได้
+                loadQuestions();
+
+            } catch (err) {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                alert("เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์: " + err.message);
+            }
+        }
+
+        // ฟังก์ชันสำหรับปิด Popup แจ้งเตือนสิทธิ์เต็ม
+        function closeLimitModal() {
+            document.getElementById('limitModal').classList.add('hidden');
+            document.getElementById('limitModal').classList.remove('flex');
         }
 
         function loadQuestions() {
