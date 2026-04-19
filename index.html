@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-    <title>True Corporation</title>
+    <title>Online Quiz System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700;800&display=swap" rel="stylesheet">
@@ -24,13 +24,15 @@
 </head>
 <body class="h-[100dvh] flex flex-col overflow-hidden text-gray-800">
 
-    <div id="loadingOverlay" class="fixed inset-0 bg-white/95 z-[60] flex flex-col items-center justify-center">
-        <div class="relative flex justify-center items-center mb-6">
-            <div class="absolute animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
-            <img src="https://img2.pic.in.th/True--C.png" class="h-8 w-auto opacity-90">
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-white/95 z-[60]">
+        <div class="flex flex-col items-center justify-center h-full w-full">
+            <div class="relative flex justify-center items-center mb-6">
+                <div class="absolute animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+                <img src="https://img2.pic.in.th/True--C.png" class="h-8 w-auto opacity-90">
+            </div>
+            <p id="loadingText" class="text-gray-600 font-bold animate-pulse tracking-wide">กำลังโหลด...</p>
+            <p id="errorText" class="text-red-500 text-sm mt-4 hidden">โหลดนานผิดปกติ? กรุณารีเฟรช หรือตรวจสอบสัญญาณเน็ต</p>
         </div>
-        <p id="loadingText" class="text-gray-600 font-bold animate-pulse tracking-wide">กำลังโหลด...</p>
-        <p id="errorText" class="text-red-500 text-sm mt-4 hidden">โหลดนานผิดปกติ? กรุณารีเฟรช หรือตรวจสอบสัญญาณเน็ต</p>
     </div>
 
     <div id="systemMessageScreen" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-100/50 backdrop-blur-sm overflow-hidden">
@@ -59,7 +61,7 @@
         </div>
     </div>
 
-    <div id="loginScreen" class="hidden h-full flex-col items-center justify-center p-4 overflow-y-auto">
+    <div id="loginScreen" class="flex h-full flex-col items-center justify-center p-4 overflow-y-auto">
         <div class="bg-white rounded-[2.5rem] shadow-2xl max-w-md w-full border border-gray-100 flex flex-col shrink-0 my-auto">
             <div class="bg-gradient-to-r from-red-600 to-blue-500 p-8 text-white text-center shrink-0 rounded-t-[2.5rem]">
                 <h1 id="lblQuizName" class="text-2xl font-bold mb-1">...</h1>
@@ -74,7 +76,7 @@
                             <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-red-500 border-r-red-500 animate-[spin_1s_linear_infinite]"></div>
                             <img id="loadingProfilePic" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-12 h-12 rounded-full object-cover z-10 bg-white">
                         </div>
-                        <p class="text-sm font-bold text-blue-600 animate-pulse">กำลังยืนยันข้อมูล...</p>
+                        <p class="text-sm font-bold text-blue-600 animate-pulse">กำลังยืนยันข้อมูล โปรดรอสักครู่...</p>
                     </div>
 
                     <div id="profileCard" class="hidden animate-fade-in-up bg-gradient-to-br from-gray-50 to-white p-5 rounded-[1.5rem] border border-gray-200 shadow-sm text-center">
@@ -89,7 +91,7 @@
                             <div class="bg-blue-50 text-blue-700 px-4 py-1 rounded-full text-sm font-bold mb-2">
                                 รหัสพนักงาน: <span id="displayEmpId">...</span>
                             </div>
-                            <p class="text-sm text-gray-600">ช่องทาง/ตำแหน่ง: <span id="displayDept" class="font-medium text-gray-800">...</span></p>
+                            <p class="text-sm text-gray-600">แผนก: <span id="displayDept" class="font-medium text-gray-800">...</span></p>
                         </div>
                     </div>
 
@@ -307,20 +309,19 @@
                 document.getElementById('sysMsgTitle').innerText = "หมดเวลาสอบ"; document.getElementById('sysMsgDetail').innerText = "ระบบปิดรับคำตอบแล้ว";
             }
 
-            document.getElementById('loadingOverlay').classList.add('hidden');
-
             if (!isAccessAllowed) {
                 document.getElementById('systemMessageScreen').classList.remove('hidden');
                 document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('loginScreen').classList.remove('flex');
                 document.getElementById('msgStart').innerText = startDate ? startDate.toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '-';
                 document.getElementById('msgEnd').innerText = endDate ? endDate.toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '-';
-            } else {
-                document.getElementById('loginScreen').classList.remove('hidden');
-                document.getElementById('loginScreen').classList.add('flex');
             }
         }
 
-        function alertErr(e) { document.getElementById('loadingText').innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อ"; }
+        function alertErr(e) { 
+            const loadingCont = document.getElementById('autoVerifyContainer');
+            if(loadingCont) loadingCont.innerHTML = `<p class="text-sm font-bold text-red-500">เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณารีเฟรช</p>`;
+        }
 
         function executeAutoVerify(lineUid) {
             fetchGAS('getEmployeeByLineId', [lineUid]).then(res => {
@@ -350,7 +351,6 @@
 
         function verifyManualId() {
             if (document.activeElement) document.activeElement.blur();
-            
             const empIdInput = document.getElementById('inpEmpId').value.trim();
             if(!empIdInput) { alert("กรุณากรอกรหัสพนักงาน"); return; }
             
@@ -383,7 +383,6 @@
 
         function registerNewUser() {
             if (document.activeElement) document.activeElement.blur();
-            
             const regEmpId = document.getElementById('inpRegEmpId').value.trim();
             const regName = document.getElementById('inpRegName').value.trim();
             
@@ -501,7 +500,6 @@
             const pct = Math.round((score / state.questions.length) * 100); const passed = pct >= state.settings.passingPercentage;
             const durationSec = Math.floor((endTime - startTime)/1000); const durationStr = `${Math.floor(durationSec/60)}:${(durationSec%60).toString().padStart(2,'0')}`;
             
-            // --- ส่งรูปลงไปบันทึกด้วย (profilePic: userLinePic) ---
             const result = {
                 studentId: state.user.id, fullName: state.user.name, score: score, totalQuestions: state.questions.length,
                 percentage: pct, grade: passed ? "ผ่าน" : "ไม่ผ่าน", duration: durationStr, answerLog: detailedLog.join('\n----------------\n'),
@@ -552,9 +550,7 @@
                         top3Html += `<div class="flex flex-col items-center relative transition-transform hover:-translate-y-1 duration-300 podium-enter ${cf.margin}">
                             <div class="${cf.medalSize} drop-shadow-md mb-[-1.5rem] z-40 relative">${cf.medal}</div>
                             <div class="bg-white w-full ${cf.cardHeight} rounded-2xl ${cf.borderTop} ${cf.shadow} flex flex-col items-center pt-8 pb-4 px-2 relative overflow-hidden">
-                                
                                 <img src="${p.profilePic}" class="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover mb-3 ${cf.avatarRing} shadow-inner bg-white">
-                                
                                 <div class="w-full px-1 flex items-center justify-center min-h-[3rem] mb-1"><div class="${cf.nameSize} font-bold text-gray-800 leading-tight text-center break-words w-full">${p.name}</div></div>
                                 <div class="font-black ${cf.scoreSize} ${cf.scoreColor} tracking-tight leading-none">${p.score}</div>
                                 <div class="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-2">Score</div>
@@ -569,9 +565,7 @@
                     rest.forEach((row, idx) => {
                         listHtml += `<div class="flex items-center p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:border-indigo-200 transition group podium-enter" style="animation-delay: ${0.3 + (idx * 0.05)}s">
                             <div class="w-8 text-center font-bold text-gray-400 text-sm">#${idx + 4}</div>
-                            
                             <img src="${row.profilePic}" class="mx-3 w-8 h-8 rounded-full object-cover shrink-0 border border-gray-200 bg-white">
-                            
                             <div class="flex-grow min-w-0"><div class="font-bold text-gray-700 truncate text-sm">${row.name}</div><div class="text-[10px] text-gray-400 flex items-center gap-1"><span>⏱️</span> ${row.durationStr}</div></div>
                             <div class="text-right"><div class="font-bold text-indigo-600 text-lg">${row.score}</div></div></div>`;
                     });
