@@ -17,8 +17,9 @@
 </head>
 <body class="text-slate-800 h-screen flex flex-col overflow-hidden">
 
-    <header class="bg-white border-b border-slate-200 py-4 px-6 md:px-8 shrink-0 flex justify-between items-center z-20">
-        <div class="flex items-center gap-5">
+    <header class="bg-white border-b border-slate-200 py-4 px-6 md:px-8 shrink-0 flex justify-between items-center z-20 relative">
+        
+        <div class="flex items-center gap-5 relative z-10">
             <img src="https://img2.pic.in.th/True--C.png" class="h-8 md:h-10 w-auto" alt="True Logo">
             <div class="h-10 w-px bg-slate-200 hidden md:block"></div>
             <div>
@@ -27,24 +28,24 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-5">
-            <div id="countdownContainer" class="hidden lg:flex flex-col items-end text-right">
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">สิ้นสุดการสอบ: <span id="endDateDisplay" class="text-slate-700 font-black">-</span></p>
-                <div id="countdownDisplay" class="text-lg font-black text-red-600 bg-red-50 px-4 py-1.5 rounded-lg border border-red-100 shadow-sm min-w-[160px] text-center tracking-wider">
-                    กำลังคำนวณเวลา...
-                </div>
+        <div id="countdownContainer" class="hidden lg:flex flex-col items-center justify-center absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none w-full">
+            <p class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">สิ้นสุดการสอบ: <span id="endDateDisplay" class="text-slate-800 font-black">-</span></p>
+            <div id="countdownDisplay" class="text-2xl xl:text-3xl font-black text-red-600 bg-red-50 px-8 py-2 rounded-xl border-2 border-red-100 shadow-md min-w-[260px] text-center tracking-widest pointer-events-auto">
+                กำลังคำนวณเวลา...
             </div>
+        </div>
 
-            <button onclick="loadDashboardData()" class="flex items-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 rounded-lg text-sm font-semibold transition-colors border border-slate-200 hover:border-red-200 shadow-sm">
+        <div class="flex items-center gap-5 relative z-10">
+            <button onclick="loadDashboardData()" class="flex items-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 rounded-lg text-sm font-semibold transition-colors border border-slate-200 hover:border-red-200 shadow-sm pointer-events-auto">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                 <span class="hidden md:inline">รีเฟรชข้อมูล</span>
             </button>
         </div>
     </header>
 
-    <div id="mobileCountdownContainer" class="lg:hidden bg-slate-50 border-b border-slate-200 px-6 py-3 flex justify-between items-center shrink-0 shadow-inner hidden">
-        <span class="text-slate-500 font-bold uppercase text-xs">สิ้นสุด: <span id="mobEndDateDisplay" class="text-slate-700 font-black ml-1">-</span></span>
-        <span id="mobCountdownDisplay" class="text-red-600 font-black bg-red-100 px-3 py-1 rounded-md shadow-sm tracking-wide text-sm">...</span>
+    <div id="mobileCountdownContainer" class="lg:hidden bg-slate-50 border-b border-slate-200 px-6 py-4 flex flex-col justify-center items-center gap-2 shrink-0 shadow-inner hidden">
+        <span class="text-slate-500 font-bold uppercase text-xs tracking-widest">สิ้นสุด: <span id="mobEndDateDisplay" class="text-slate-800 font-black ml-1">-</span></span>
+        <span id="mobCountdownDisplay" class="text-red-600 font-black bg-red-100 px-4 py-1.5 rounded-lg shadow-sm tracking-widest text-lg border border-red-200 w-full text-center">...</span>
     </div>
 
     <main class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
@@ -231,7 +232,7 @@
             }
         }
 
-        // --- ฟังก์ชันอัปเดตการแสดงผลเวลา (ปรับ CSS ให้ตัวอักษรใหญ่และหนาขึ้น) ---
+        // --- ฟังก์ชันอัปเดตการแสดงผลเวลา (ขนาดใหญ่ 2XL-3XL และจัดกึ่งกลางเป๊ะ) ---
         function setupCountdown(endDateStr) {
             if(countdownInterval) clearInterval(countdownInterval);
             
@@ -249,11 +250,11 @@
                 dateDesk.innerText = 'ไม่มีกำหนด';
                 dateMob.innerText = 'ไม่มีกำหนด';
                 
-                const activeClass = 'text-lg font-black text-green-600 bg-green-50 px-4 py-1.5 rounded-lg border border-green-100 shadow-sm min-w-[160px] text-center tracking-wider';
+                const activeClassDesk = 'text-2xl xl:text-3xl font-black text-green-600 bg-green-50 px-8 py-2 rounded-xl border-2 border-green-100 shadow-md min-w-[260px] text-center tracking-widest pointer-events-auto';
                 displayDesk.innerText = 'เปิดระบบตลอดเวลา';
-                displayDesk.className = activeClass;
+                displayDesk.className = activeClassDesk;
                 displayMob.innerText = 'เปิดตลอดเวลา';
-                displayMob.className = 'text-green-600 font-black bg-green-100 px-3 py-1 rounded-md shadow-sm text-sm';
+                displayMob.className = 'text-green-600 font-black bg-green-100 px-4 py-1.5 rounded-lg shadow-sm tracking-widest text-lg border border-green-200 w-full text-center';
                 return;
             }
 
@@ -272,8 +273,8 @@
                 if (diff <= 0) {
                     clearInterval(countdownInterval);
                     const endText = 'หมดเวลาทำแบบทดสอบ';
-                    const endClassDesk = 'text-lg font-black text-slate-500 bg-slate-100 px-4 py-1.5 rounded-lg border border-slate-200 shadow-sm min-w-[160px] text-center tracking-wider';
-                    const endClassMob = 'text-slate-600 font-black bg-slate-200 px-3 py-1 rounded-md shadow-sm text-sm';
+                    const endClassDesk = 'text-2xl xl:text-3xl font-black text-slate-500 bg-slate-100 px-8 py-2 rounded-xl border-2 border-slate-200 shadow-md min-w-[260px] text-center tracking-widest pointer-events-auto';
+                    const endClassMob = 'text-slate-600 font-black bg-slate-200 px-4 py-1.5 rounded-lg shadow-sm text-lg border border-slate-300 w-full text-center';
                     
                     displayDesk.innerText = endText;
                     displayDesk.className = endClassDesk;
@@ -289,8 +290,8 @@
                     if(days > 0) timeStr += `${days} วัน `;
                     timeStr += `${hours.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')} ชม.`;
                     
-                    const activeClassDesk = 'text-lg font-black text-red-600 bg-red-50 px-4 py-1.5 rounded-lg border border-red-100 shadow-sm min-w-[160px] text-center tracking-wider';
-                    const activeClassMob = 'text-red-600 font-black bg-red-100 px-3 py-1 rounded-md shadow-sm tracking-wide text-sm';
+                    const activeClassDesk = 'text-2xl xl:text-3xl font-black text-red-600 bg-red-50 px-8 py-2 rounded-xl border-2 border-red-100 shadow-md min-w-[260px] text-center tracking-widest pointer-events-auto';
+                    const activeClassMob = 'text-red-600 font-black bg-red-100 px-4 py-1.5 rounded-lg shadow-sm tracking-widest text-lg border border-red-200 w-full text-center';
 
                     displayDesk.innerText = `⏳ ${timeStr}`;
                     displayDesk.className = activeClassDesk;
