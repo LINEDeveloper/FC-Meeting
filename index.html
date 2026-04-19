@@ -91,7 +91,7 @@
                             <div class="bg-blue-50 text-blue-700 px-4 py-1 rounded-full text-sm font-bold mb-2">
                                 รหัสพนักงาน: <span id="displayEmpId">...</span>
                             </div>
-                            <p class="text-sm text-gray-600">แผนก: <span id="displayDept" class="font-medium text-gray-800">...</span></p>
+                            <p class="text-sm text-gray-600">ช่องทาง/ตำแหน่ง: <span id="displayDept" class="font-medium text-gray-800">...</span></p>
                         </div>
                     </div>
 
@@ -341,7 +341,6 @@
             }).catch(alertErr);
         }
 
-        // --- จุดที่อัปเดต: เพิ่มข้อความ "กำลังตรวจสอบ..." แบบสวยงาม ---
         function verifyManualId() {
             if (document.activeElement) document.activeElement.blur();
             const empIdInput = document.getElementById('inpEmpId').value.trim();
@@ -356,7 +355,7 @@
 
             fetchGAS('getEmployeeByEmpId', [empIdInput, currentLineUid]).then(res => {
                 btn.innerText = "ตรวจสอบ"; btn.disabled = false;
-                msgEl.innerHTML = ""; // ลบข้อความออกเมื่อตรวจสอบเสร็จ
+                msgEl.innerHTML = "";
                 
                 if (res.found) {
                     state.user = { id: res.id, name: res.name, dept: res.department };
