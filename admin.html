@@ -24,13 +24,15 @@
 </head>
 <body class="h-[100dvh] flex flex-col overflow-hidden text-gray-800">
 
-    <div id="loadingOverlay" class="hidden fixed inset-0 bg-white/95 z-[60] flex flex-col items-center justify-center">
-        <div class="relative flex justify-center items-center mb-6">
-            <div class="absolute animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
-            <img src="https://img2.pic.in.th/True--C.png" class="h-8 w-auto opacity-90">
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-white/95 z-[60]">
+        <div class="flex flex-col items-center justify-center h-full w-full">
+            <div class="relative flex justify-center items-center mb-6">
+                <div class="absolute animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+                <img src="https://img2.pic.in.th/True--C.png" class="h-8 w-auto opacity-90">
+            </div>
+            <p id="loadingText" class="text-gray-600 font-bold animate-pulse tracking-wide">กำลังโหลด...</p>
+            <p id="errorText" class="text-red-500 text-sm mt-4 hidden">โหลดนานผิดปกติ? กรุณารีเฟรช หรือตรวจสอบสัญญาณเน็ต</p>
         </div>
-        <p id="loadingText" class="text-gray-600 font-bold animate-pulse tracking-wide">กำลังโหลด...</p>
-        <p id="errorText" class="text-red-500 text-sm mt-4 hidden">โหลดนานผิดปกติ? กรุณารีเฟรช หรือตรวจสอบสัญญาณเน็ต</p>
     </div>
 
     <div id="systemMessageScreen" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-100/50 backdrop-blur-sm overflow-hidden">
@@ -253,6 +255,14 @@
         let currentLineUid = ""; 
 
         window.onload = async () => { 
+            setTimeout(() => {
+                const overlay = document.getElementById('loadingOverlay');
+                if (!overlay.classList.contains('hidden')) {
+                    document.getElementById('loadingText').innerText = "เชื่อมต่อนานผิดปกติ...";
+                    document.getElementById('errorText').classList.remove('hidden');
+                }
+            }, 10000);
+
             try {
                 const settings = await fetchGAS('getQuizSettings');
                 initData(settings);
@@ -299,7 +309,6 @@
                 document.getElementById('sysMsgTitle').innerText = "หมดเวลาสอบ"; document.getElementById('sysMsgDetail').innerText = "ระบบปิดรับคำตอบแล้ว";
             }
 
-            // เนื่องจากเราตั้ง hidden ให้ loadingOverlay เป็นค่าเริ่มต้นแล้ว ไม่ต้อง add hidden ซ้ำ
             if (!isAccessAllowed) {
                 document.getElementById('systemMessageScreen').classList.remove('hidden');
                 document.getElementById('loginScreen').classList.add('hidden');
@@ -310,7 +319,6 @@
         }
 
         function alertErr(e) { 
-            // ฟังก์ชันเตือน Error หากระบบฐานข้อมูลตอบกลับช้า
             const loadingCont = document.getElementById('autoVerifyContainer');
             if(loadingCont) loadingCont.innerHTML = `<p class="text-sm font-bold text-red-500">เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณารีเฟรช</p>`;
         }
@@ -407,7 +415,6 @@
 
         function startQuizNow() {
             if(!state.user.id) return;
-            // โชว์ Loading แบบเต็มจอเฉพาะตอนโหลดข้อสอบและตอนส่งคำตอบเท่านั้น
             document.getElementById('loadingOverlay').classList.remove('hidden');
             loadQuestions();
         }
