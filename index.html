@@ -92,11 +92,6 @@
                                 รหัสพนักงาน: <span id="displayEmpId">...</span>
                             </div>
                             <p class="text-sm text-gray-600">ช่องทาง/ตำแหน่ง: <span id="displayDept" class="font-medium text-gray-800">...</span></p>
-                            
-                            <!-- ปุ่มดูประวัติ (แทรกเพิ่ม) -->
-                            <button onclick="openHistoryModal()" class="mt-4 w-full py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition text-sm shadow-sm flex items-center justify-center gap-2">
-                                📋 ดูผลการสอบล่าสุด
-                            </button>
                         </div>
                     </div>
 
@@ -245,37 +240,6 @@
             <h3 class="text-2xl font-bold text-slate-800 mb-2">สิทธิ์การสอบเต็มแล้ว</h3>
             <p class="text-slate-500 text-sm mb-6 leading-relaxed">คุณได้ทำแบบทดสอบครบตามโควต้า <span id="limitCountText" class="font-bold text-red-600 text-base"></span> ครั้งที่ระบบกำหนดไว้แล้วครับ</p>
             <button onclick="closeLimitModal()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95">รับทราบ</button>
-        </div>
-    </div>
-
-    <!-- Popup ประวัติการสอบ (แทรกเพิ่ม) -->
-    <div id="historyModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-[70] backdrop-blur-sm p-4 transition-opacity">
-        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm p-8 text-center transform transition-all animate-fade-in-up border border-slate-100 relative">
-            <button onclick="closeHistoryModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600 flex items-center justify-center transition font-bold">✕</button>
-            
-            <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
-                <span class="text-4xl drop-shadow-sm">📋</span>
-            </div>
-            <h3 class="text-2xl font-bold text-slate-800 mb-2">ประวัติการสอบ</h3>
-            
-            <div id="historyLoading" class="py-6 text-blue-500 animate-pulse text-sm font-bold flex flex-col items-center gap-2">
-                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div> กำลังดึงข้อมูล...
-            </div>
-            
-            <div id="historyContent" class="hidden">
-                <p class="text-slate-500 text-sm mb-4 leading-relaxed">ผลการสอบครั้งล่าสุดของคุณ</p>
-                <div class="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-5 border border-gray-100 mb-4 shadow-sm">
-                    <div class="text-4xl font-black text-blue-600 mb-1" id="historyScore">-/-</div>
-                    <div class="text-sm font-bold mb-2" id="historyStatus">สถานะ: -</div>
-                    <div class="text-xs text-gray-400 bg-gray-100 inline-block px-3 py-1 rounded-lg" id="historyDate">ทำเมื่อ: -</div>
-                </div>
-            </div>
-            
-            <div id="historyNoData" class="hidden py-6 text-red-500 text-sm font-bold">
-                ยังไม่พบประวัติการสอบของคุณในระบบ
-            </div>
-
-            <button onclick="closeHistoryModal()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl shadow-md transition-all active:scale-95">รับทราบ</button>
         </div>
     </div>
 
@@ -461,14 +425,17 @@
             }).catch(alertErr);
         }
 
+        // 📌 ฟังก์ชันเริ่มทำแบบทดสอบ (เพิ่มระบบเช็คจำนวนครั้งโควต้า)
         async function startQuizNow() {
             if(!state.user.id) return;
             document.getElementById('loadingOverlay').classList.remove('hidden');
             
             try {
+                // 1. ส่งไอดีพนักงานไปเช็คในระบบว่าสอบไปกี่ครั้งแล้ว
                 const res = await fetchGAS('checkUserAttempts', [state.user.id]);
                 const maxAttempts = parseInt(state.settings.maxAttempts) || 1; 
                 
+                // 2. ถ้าสอบเกินหรือเท่ากับโควต้า ให้บล็อกทันที
                 if (res.attempts >= maxAttempts) {
                     document.getElementById('loadingOverlay').classList.add('hidden');
                     document.getElementById('limitCountText').innerText = maxAttempts;
@@ -477,6 +444,7 @@
                     return;
                 }
                 
+                // 3. ถ้ายังไม่เกินโควต้า ให้เข้าสอบได้
                 loadQuestions();
 
             } catch (err) {
@@ -485,6 +453,7 @@
             }
         }
 
+        // ฟังก์ชันสำหรับปิด Popup แจ้งเตือนสิทธิ์เต็ม
         function closeLimitModal() {
             document.getElementById('limitModal').classList.add('hidden');
             document.getElementById('limitModal').classList.remove('flex');
@@ -645,48 +614,6 @@
             }).catch(alertErr);
         }
         function closeLeaderboard() { document.getElementById('leaderboardModal').classList.add('hidden'); document.getElementById('leaderboardModal').classList.remove('flex'); }
-
-        // ===== ฟังก์ชัน Popup ประวัติการสอบ (แทรกเพิ่ม) =====
-        function openHistoryModal() {
-            if (!state.user.id) return;
-            const modal = document.getElementById('historyModal');
-            const loading = document.getElementById('historyLoading');
-            const content = document.getElementById('historyContent');
-            const noData = document.getElementById('historyNoData');
-            
-            modal.classList.remove('hidden'); modal.classList.add('flex');
-            loading.classList.remove('hidden'); content.classList.add('hidden'); noData.classList.add('hidden');
-            
-            fetchGAS('getUserLatestResult', [state.user.id]).then(res => {
-                loading.classList.add('hidden');
-                if (res && res.found) {
-                    content.classList.remove('hidden');
-                    document.getElementById('historyScore').innerText = `${res.score}/${res.total}`;
-                    const statusEl = document.getElementById('historyStatus');
-                    statusEl.innerText = `สถานะ: ${res.grade}`;
-                    statusEl.className = res.grade === "ผ่าน" ? "text-sm font-bold text-green-600 mb-2" : "text-sm font-bold text-red-500 mb-2";
-                    
-                    let dateStr = res.date;
-                    try {
-                        const d = new Date(res.date);
-                        if(!isNaN(d)) dateStr = d.toLocaleString('th-TH', {dateStyle: 'short', timeStyle: 'short'});
-                    } catch(e){}
-                    
-                    document.getElementById('historyDate').innerText = `ทำเมื่อ: ${dateStr}`;
-                } else {
-                    noData.classList.remove('hidden');
-                }
-            }).catch(err => {
-                loading.classList.add('hidden');
-                noData.innerText = "เกิดข้อผิดพลาดในการดึงข้อมูล";
-                noData.classList.remove('hidden');
-            });
-        }
-
-        function closeHistoryModal() {
-            document.getElementById('historyModal').classList.add('hidden'); 
-            document.getElementById('historyModal').classList.remove('flex');
-        }
     </script>
 </body>
 </html>
