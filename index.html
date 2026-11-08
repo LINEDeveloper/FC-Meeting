@@ -638,7 +638,7 @@
                     const isCorrect = state.answers[i] === q.correct; 
                     if(isCorrect) score++; else incorrectIndices.push(i);
                     const tempDiv = document.createElement("div"); tempDiv.innerHTML = q.question; 
-                    const cleanQ = (tempDiv.textContent || "").substring(0, 40) + "...";
+                    const cleanQ = (tempDiv.textContent || tempDiv.innerText || "").replace(/\s+/g, " ").trim();
                     const uAns = state.answers[i] !== null ? q.options[state.answers[i]] : "ไม่ได้ตอบ"; 
                     const cAns = q.options[q.correct];
                     let logText = `${isCorrect ? "✅" : "🅧"} [ข้อ ${i+1}] ${cleanQ}\n   ตอบ: ${uAns}`;
