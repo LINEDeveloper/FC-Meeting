@@ -247,31 +247,57 @@
         const LIFF_ID = "1656846002-MnLVVNBD"; 
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx6Qq3EJQ41GWV5wzK3_h8rSjpZkvUVl7GHXIEJ2zdl-Iu5GyUBMOJDJud5ywMe1z5lZQ/exec"; 
 
-        async function fetchGAS(action, args = []) {
-            try {
-                const response = await fetch(GAS_WEB_APP_URL, {
-                    method: 'POST', body: JSON.stringify({ action: action, args: args })
-                });
-                const data = await response.json();
-                if (data.error) throw new Error(data.error);
-                return data.result;
-            } catch (err) {
-                console.error("GAS Error:", err); throw err;
+        // ⚡ อัปเกรดระบบเชื่อมต่อ GAS: เพิ่ม Timeout กันค้าง + ระบบลองส่งซ้ำอัตโนมัติ (Auto-Retry)
+        async function fetchGAS(action, args = [], retries = 3) {
+            for (let attempt = 1; attempt <= retries; attempt++) {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 25000); // กันหน้าจอค้างเกิน 25 วินาที
+
+                try {
+                    const response = await fetch(GAS_WEB_APP_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: action, args: args }),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    const data = await response.json();
+                    if (data.error) throw new Error(data.error);
+                    return data.result;
+                } catch (err) {
+                    clearTimeout(timeoutId);
+                    console.warn(`GAS Error [${action}] (Attempt ${attempt}/${retries}):`, err);
+                    if (attempt === retries) throw err;
+                    
+                    // หากเป็นการส่งคำตอบแล้วเน็ตสะดุด ให้แจ้งสถานะกำลังพยายามส่งใหม่บนหน้าจอ
+                    if (action === 'saveQuizResult') {
+                        const loadTxt = document.getElementById('loadingText');
+                        if (loadTxt) loadTxt.innerText = `กำลังส่งคำตอบ... (ลองใหม่อีกครั้ง ${attempt}/${retries - 1})`;
+                    }
+                    await new Promise(r => setTimeout(r, 1500 * attempt)); // รอจังหวะก่อนส่งซ้ำ
+                }
             }
         }
 
-        let state = { settings: null, questions: [], answers: [], currIdx: 0, timer: null, timeLeft: 0, user: {} };
+        let state = { 
+            settings: null, questions: [], answers: [], currIdx: 0, timer: null, timeLeft: 0, user: {},
+            isSubmitting: false, isSubmitted: false, isStarting: false,
+            cachedSubmission: null, preloadedQuestionsPromise: null
+        };
         let startTime, endTime;
         let userLinePic = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; 
         let currentLineUid = ""; 
 
+        // ⚡ โหลด Settings และเริ่มต้น LIFF พร้อมกันแบบ Parallel เพื่อลดเวลาเปิดแอป
         window.onload = async () => { 
             try {
-                const settings = await fetchGAS('getQuizSettings');
+                const [settings] = await Promise.all([
+                    fetchGAS('getQuizSettings'),
+                    liff.init({ liffId: LIFF_ID })
+                ]);
                 initData(settings);
 
                 if (!document.getElementById('loginScreen').classList.contains('hidden')) {
-                    await liff.init({ liffId: LIFF_ID }); 
                     if (liff.isLoggedIn()) {
                         const profile = await liff.getProfile();
                         userLinePic = profile.pictureUrl || userLinePic;
@@ -326,6 +352,13 @@
             if(loadingCont) loadingCont.innerHTML = `<p class="text-sm font-bold text-red-500">เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณารีเฟรช</p>`;
         }
 
+        // ⚡ แอบโหลดข้อสอบรอไว้ล่วงหน้าในพื้นหลังทันทีที่ยืนยันตัวตนสำเร็จ
+        function preloadQuestionsInBackground() {
+            if (!state.preloadedQuestionsPromise) {
+                state.preloadedQuestionsPromise = fetchGAS('getQuizQuestions').catch(() => null);
+            }
+        }
+
         function executeAutoVerify(lineUid) {
             fetchGAS('getEmployeeByLineId', [lineUid]).then(res => {
                 const autoCont = document.getElementById('autoVerifyContainer');
@@ -345,6 +378,7 @@
                     
                     startBtn.disabled = false; startBtn.innerText = "เริ่มทำแบบทดสอบ";
                     startBtn.className = "w-full bg-green-500 text-white py-4 rounded-[1.5rem] font-bold shadow hover:bg-green-600 hover:-translate-y-1 transition transform cursor-pointer mt-4";
+                    preloadQuestionsInBackground();
                 } else {
                     autoCont.classList.add('hidden');
                     manCont.classList.remove('hidden');
@@ -381,6 +415,7 @@
                     const startBtn = document.getElementById('btnStart');
                     startBtn.disabled = false; startBtn.innerText = "เริ่มทำแบบทดสอบ";
                     startBtn.className = "w-full bg-green-500 text-white py-4 rounded-[1.5rem] font-bold shadow hover:bg-green-600 hover:-translate-y-1 transition transform cursor-pointer mt-4";
+                    preloadQuestionsInBackground();
                 } else {
                     document.getElementById('manualIdContainer').classList.add('hidden');
                     document.getElementById('registerContainer').classList.remove('hidden');
@@ -419,24 +454,26 @@
                     const startBtn = document.getElementById('btnStart');
                     startBtn.disabled = false; startBtn.innerText = "เริ่มทำแบบทดสอบ";
                     startBtn.className = "w-full bg-green-500 text-white py-4 rounded-[1.5rem] font-bold shadow hover:bg-green-600 hover:-translate-y-1 transition transform cursor-pointer mt-4";
+                    preloadQuestionsInBackground();
                 } else {
                     alert("เกิดข้อผิดพลาดในการลงทะเบียน: " + res.error);
                 }
             }).catch(alertErr);
         }
 
-        // 📌 ฟังก์ชันเริ่มทำแบบทดสอบ (เพิ่มระบบเช็คจำนวนครั้งโควต้า)
+        // 📌 ฟังก์ชันเริ่มทำแบบทดสอบ (ป้องกันการกดปุ่มเริ่มสอบรัวๆ)
         async function startQuizNow() {
-            if(!state.user.id) return;
+            if(!state.user.id || state.isStarting) return;
+            state.isStarting = true;
+            document.getElementById('loadingText').innerText = "กำลังโหลด...";
             document.getElementById('loadingOverlay').classList.remove('hidden');
             
             try {
-                // 1. ส่งไอดีพนักงานไปเช็คในระบบว่าสอบไปกี่ครั้งแล้ว
                 const res = await fetchGAS('checkUserAttempts', [state.user.id]);
                 const maxAttempts = parseInt(state.settings.maxAttempts) || 1; 
                 
-                // 2. ถ้าสอบเกินหรือเท่ากับโควต้า ให้บล็อกทันที
                 if (res.attempts >= maxAttempts) {
+                    state.isStarting = false;
                     document.getElementById('loadingOverlay').classList.add('hidden');
                     document.getElementById('limitCountText').innerText = maxAttempts;
                     document.getElementById('limitModal').classList.remove('hidden');
@@ -444,28 +481,39 @@
                     return;
                 }
                 
-                // 3. ถ้ายังไม่เกินโควต้า ให้เข้าสอบได้
-                loadQuestions();
-
+                await loadQuestions();
             } catch (err) {
+                state.isStarting = false;
                 document.getElementById('loadingOverlay').classList.add('hidden');
                 alert("เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์: " + err.message);
             }
         }
 
-        // ฟังก์ชันสำหรับปิด Popup แจ้งเตือนสิทธิ์เต็ม
         function closeLimitModal() {
             document.getElementById('limitModal').classList.add('hidden');
             document.getElementById('limitModal').classList.remove('flex');
         }
 
-        function loadQuestions() {
-            fetchGAS('getQuizQuestions').then(qs => {
+        async function loadQuestions() {
+            try {
+                // ดึงข้อสอบจากที่แอบโหลดไว้แล้ว ถ้ายังไม่มีค่อยโหลดใหม่
+                let qs = state.preloadedQuestionsPromise ? await state.preloadedQuestionsPromise : null;
+                if (!qs) qs = await fetchGAS('getQuizQuestions');
+                
                 state.questions = qs.slice(0, state.settings.numberOfQuestions);
                 state.answers = new Array(state.questions.length).fill(null);
-                if(state.questions.length === 0) { alert("ไม่พบข้อสอบ"); return; }
+                if(state.questions.length === 0) { 
+                    state.isStarting = false;
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                    alert("ไม่พบข้อสอบ"); 
+                    return; 
+                }
                 setupQuizUI();
-            }).catch(alertErr);
+            } catch (err) {
+                state.isStarting = false;
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                alert("โหลดข้อสอบไม่สำเร็จ กรุณากดเริ่มทำแบบทดสอบอีกครั้ง");
+            }
         }
 
         function setupQuizUI() {
@@ -479,7 +527,11 @@
 
             state.timeLeft = state.settings.timeLimitMinutes * 60; startTime = new Date();
             updateTimer();
-            state.timer = setInterval(() => { state.timeLeft--; updateTimer(); if(state.timeLeft <= 0) submitQuiz(true); }, 1000);
+            state.timer = setInterval(() => { 
+                state.timeLeft--; 
+                updateTimer(); 
+                if(state.timeLeft <= 0) submitQuiz(true); 
+            }, 1000);
 
             const map = document.getElementById('questionMap'); map.innerHTML = '';
             state.questions.forEach((_, i) => { map.innerHTML += `<button id="map-${i}" onclick="jump(${i})" class="w-8 h-8 rounded bg-white border text-gray-500 text-sm hover:border-indigo-400 transition">${i+1}</button>`; });
@@ -487,8 +539,8 @@
         }
 
         function updateTimer() {
-            const m = Math.floor(state.timeLeft / 60).toString().padStart(2,'0');
-            const s = (state.timeLeft % 60).toString().padStart(2,'0');
+            const m = Math.floor(Math.max(0, state.timeLeft) / 60).toString().padStart(2,'0');
+            const s = (Math.max(0, state.timeLeft) % 60).toString().padStart(2,'0');
             const el = document.getElementById('timerDisplay');
             if(el) { el.innerText = `${m}:${s}`; if(state.timeLeft < 60) el.classList.add('timer-urgent'); }
         }
@@ -511,11 +563,16 @@
             updateMap();
         }
 
-        function sel(idx) { state.answers[state.currIdx] = idx; renderQuestion(); }
-        function jump(i) { state.currIdx = i; renderQuestion(); }
+        function sel(idx) { if(state.isSubmitting || state.isSubmitted) return; state.answers[state.currIdx] = idx; renderQuestion(); }
+        function jump(i) { if(state.isSubmitting || state.isSubmitted) return; state.currIdx = i; renderQuestion(); }
         function nav(dir) {
-            if (dir === 1 && state.currIdx >= state.questions.length - 1) { if(confirm("ยืนยันการส่งคำตอบ?")) { submitQuiz(false); } return; } 
-            const newIdx = state.currIdx + dir; if(newIdx >= 0 && newIdx < state.questions.length) { state.currIdx = newIdx; renderQuestion(); }
+            if (state.isSubmitting || state.isSubmitted) return;
+            if (dir === 1 && state.currIdx >= state.questions.length - 1) { 
+                if(confirm("ยืนยันการส่งคำตอบ?")) { submitQuiz(false); } 
+                return; 
+            } 
+            const newIdx = state.currIdx + dir; 
+            if(newIdx >= 0 && newIdx < state.questions.length) { state.currIdx = newIdx; renderQuestion(); }
         }
 
         function updateMap() {
@@ -527,26 +584,62 @@
             });
         }
 
+        // 🔒 อัปเกรดระบบส่งคำตอบ: ป้องกันการกดส่งซ้ำ 100% และจำค่าเดิมไว้ส่งใหม่ได้หากเน็ตหลุด
         function submitQuiz(auto) {
-            clearInterval(state.timer); document.getElementById('loadingOverlay').classList.remove('hidden');
-            endTime = new Date(); let score = 0; let incorrectIndices = []; let detailedLog = [];
-            state.questions.forEach((q, i) => {
-                const isCorrect = state.answers[i] === q.correct; if(isCorrect) score++; else incorrectIndices.push(i);
-                const tempDiv = document.createElement("div"); tempDiv.innerHTML = q.question; const cleanQ = (tempDiv.textContent || "").substring(0, 40) + "...";
-                const uAns = state.answers[i] !== null ? q.options[state.answers[i]] : "ไม่ได้ตอบ"; const cAns = q.options[q.correct];
-                let logText = `${isCorrect ? "✅" : "🅧"} [ข้อ ${i+1}] ${cleanQ}\n   ตอบ: ${uAns}`;
-                if(!isCorrect) logText += `\n   (เฉลย: ${cAns})`; detailedLog.push(logText);
+            if (state.isSubmitting || state.isSubmitted) return;
+            state.isSubmitting = true;
+            clearInterval(state.timer);
+
+            const btnNext = document.getElementById('btnNext');
+            if (btnNext) btnNext.disabled = true;
+
+            document.getElementById('loadingText').innerText = "กำลังบันทึกคะแนน...";
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+
+            // คำนวณผลลัพธ์เพียงครั้งเดียว (ถ้าเคยคำนวณไว้แล้วให้ใช้ค่าเดิมเพื่อไม่ให้เวลาเพี้ยนตอนกดส่งซ้ำ)
+            if (!state.cachedSubmission) {
+                endTime = new Date(); 
+                let score = 0; 
+                let incorrectIndices = []; 
+                let detailedLog = [];
+                state.questions.forEach((q, i) => {
+                    const isCorrect = state.answers[i] === q.correct; 
+                    if(isCorrect) score++; else incorrectIndices.push(i);
+                    const tempDiv = document.createElement("div"); tempDiv.innerHTML = q.question; 
+                    const cleanQ = (tempDiv.textContent || "").substring(0, 40) + "...";
+                    const uAns = state.answers[i] !== null ? q.options[state.answers[i]] : "ไม่ได้ตอบ"; 
+                    const cAns = q.options[q.correct];
+                    let logText = `${isCorrect ? "✅" : "🅧"} [ข้อ ${i+1}] ${cleanQ}\n   ตอบ: ${uAns}`;
+                    if(!isCorrect) logText += `\n   (เฉลย: ${cAns})`; 
+                    detailedLog.push(logText);
+                });
+                const pct = Math.round((score / state.questions.length) * 100); 
+                const passed = pct >= state.settings.passingPercentage;
+                const durationSec = Math.max(1, Math.floor((endTime - startTime)/1000)); 
+                const durationStr = `${Math.floor(durationSec/60)}:${(durationSec%60).toString().padStart(2,'0')}`;
+                
+                const result = {
+                    studentId: state.user.id, fullName: state.user.name, score: score, totalQuestions: state.questions.length,
+                    percentage: pct, grade: passed ? "ผ่าน" : "ไม่ผ่าน", duration: durationStr, answerLog: detailedLog.join('\n----------------\n'),
+                    profilePic: userLinePic
+                };
+                state.cachedSubmission = { result, passed, incorrectIndices };
+            }
+
+            const { result, passed, incorrectIndices } = state.cachedSubmission;
+
+            fetchGAS('saveQuizResult', [result], 3).then(() => {
+                state.isSubmitted = true;
+                state.isSubmitting = false;
+                document.getElementById('loadingText').innerText = "กำลังโหลด...";
+                showResult(result, passed, incorrectIndices);
+            }).catch((err) => { 
+                state.isSubmitting = false;
+                if (btnNext) btnNext.disabled = false;
+                document.getElementById('loadingText').innerText = "กำลังโหลด...";
+                document.getElementById('loadingOverlay').classList.add('hidden'); 
+                alert("สัญญาณอินเทอร์เน็ตขัดข้องขณะส่งคำตอบ: " + err.message + "\nกรุณากดปุ่ม 'ส่งคำตอบ' อีกครั้งครับ"); 
             });
-            const pct = Math.round((score / state.questions.length) * 100); const passed = pct >= state.settings.passingPercentage;
-            const durationSec = Math.floor((endTime - startTime)/1000); const durationStr = `${Math.floor(durationSec/60)}:${(durationSec%60).toString().padStart(2,'0')}`;
-            
-            const result = {
-                studentId: state.user.id, fullName: state.user.name, score: score, totalQuestions: state.questions.length,
-                percentage: pct, grade: passed ? "ผ่าน" : "ไม่ผ่าน", duration: durationStr, answerLog: detailedLog.join('\n----------------\n'),
-                profilePic: userLinePic
-            };
-            fetchGAS('saveQuizResult', [result]).then(() => showResult(result, passed, incorrectIndices))
-                .catch((err) => { document.getElementById('loadingOverlay').classList.add('hidden'); alert("เกิดข้อผิดพลาดในการส่งคำตอบ: " + err.message + "\nกรุณาลองใหม่อีกครั้ง"); });
         }
 
         function showResult(res, passed, incorrectIndices) {
@@ -590,7 +683,7 @@
                         top3Html += `<div class="flex flex-col items-center relative transition-transform hover:-translate-y-1 duration-300 podium-enter ${cf.margin}">
                             <div class="${cf.medalSize} drop-shadow-md mb-[-1.5rem] z-40 relative">${cf.medal}</div>
                             <div class="bg-white w-full ${cf.cardHeight} rounded-2xl ${cf.borderTop} ${cf.shadow} flex flex-col items-center pt-8 pb-4 px-2 relative overflow-hidden">
-                                <img src="${p.profilePic}" class="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover mb-3 ${cf.avatarRing} shadow-inner bg-white">
+                                <img src="${p.profilePic}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'" class="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover mb-3 ${cf.avatarRing} shadow-inner bg-white">
                                 <div class="w-full px-1 flex items-center justify-center min-h-[3rem] mb-1"><div class="${cf.nameSize} font-bold text-gray-800 leading-tight text-center break-words w-full">${p.name}</div></div>
                                 <div class="font-black ${cf.scoreSize} ${cf.scoreColor} tracking-tight leading-none">${p.score}</div>
                                 <div class="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-2">Score</div>
@@ -605,7 +698,7 @@
                     rest.forEach((row, idx) => {
                         listHtml += `<div class="flex items-center p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:border-indigo-200 transition group podium-enter" style="animation-delay: ${0.3 + (idx * 0.05)}s">
                             <div class="w-8 text-center font-bold text-gray-400 text-sm">#${idx + 4}</div>
-                            <img src="${row.profilePic}" class="mx-3 w-8 h-8 rounded-full object-cover shrink-0 border border-gray-200 bg-white">
+                            <img src="${row.profilePic}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'" class="mx-3 w-8 h-8 rounded-full object-cover shrink-0 border border-gray-200 bg-white">
                             <div class="flex-grow min-w-0"><div class="font-bold text-gray-700 truncate text-sm">${row.name}</div><div class="text-[10px] text-gray-400 flex items-center gap-1"><span>⏱️</span> ${row.durationStr}</div></div>
                             <div class="text-right"><div class="font-bold text-indigo-600 text-lg">${row.score}</div></div></div>`;
                     });
