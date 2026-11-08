@@ -19,7 +19,7 @@
         @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
         .podium-enter { animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body class="h-[100dvh] flex flex-col overflow-hidden text-gray-800">
@@ -180,33 +180,64 @@
         </div>
     </div>
 
+    <!-- 📌 หน้าสรุปผลการทดสอบ (ดีไซน์ใหม่: โปรไฟล์มุมซ้ายบน + ข้อมูลส่วนตัว + แก้บั๊กกล่องเฉลยซ้อนทับ) -->
     <div id="resultModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 text-center shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="shrink-0 border-b border-gray-100 pb-4 mb-2">
-                <div id="resIcon" class="text-6xl mb-2 animate-bounce">🎉</div>
-                <h2 class="text-2xl font-bold text-gray-800">ผลการทดสอบ</h2>
-                <p id="resGrade" class="text-lg font-medium mb-4">...</p>
-                <div class="flex justify-center gap-4">
-                    <div class="bg-gray-50 rounded-xl p-3 w-32 border border-gray-200">
-                        <div class="text-3xl font-bold text-gray-800" id="resScore">0</div>
-                        <div class="text-gray-500 text-xs">คะแนนรวม</div>
+        <div class="bg-white rounded-3xl max-w-md w-full p-5 text-center shadow-2xl flex flex-col max-h-[90vh]">
+            
+            <!-- 1. ส่วนหัว: รูปโปรไฟล์ LINE + ข้อมูลส่วนตัว ด้านซ้ายบน และเวลาที่ใช้ด้านขวาบน -->
+            <div class="shrink-0 bg-slate-50 border border-slate-100 rounded-2xl p-3.5 mb-4 flex items-center justify-between text-left shadow-sm">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="relative shrink-0">
+                        <img id="resProfilePic" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm bg-white">
+                        <div class="absolute bottom-0 right-0 bg-green-500 w-3.5 h-3.5 rounded-full border-2 border-white"></div>
                     </div>
-                    <div class="bg-gray-50 rounded-xl p-3 w-32 border border-gray-200">
-                        <div class="text-3xl font-bold text-gray-800" id="resPercent">0%</div>
-                        <div class="text-gray-500 text-xs">คิดเป็น</div>
+                    <div class="min-w-0">
+                        <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none mb-1">ข้อมูลส่วนตัว</span>
+                        <h3 id="resName" class="text-base font-extrabold text-slate-800 truncate leading-tight">...</h3>
+                    </div>
+                </div>
+                <div class="text-right shrink-0 pl-3 border-l border-slate-200/80">
+                    <span class="block text-[10px] font-semibold text-slate-400">เวลาที่ใช้</span>
+                    <span id="resTime" class="text-xs font-bold text-slate-700">-</span>
+                </div>
+            </div>
+
+            <!-- 2. ส่วนแสดงคะแนนรวม -->
+            <div class="shrink-0 border-b border-gray-100 pb-4 mb-2">
+                <!-- ป้ายแจ้งเตือนกรณีเคยสอบครบโควต้าแล้ว (จะแสดงเฉพาะตอนกดเข้ามาดูซ้ำ) -->
+                <div id="quotaNoticeBadge" class="hidden inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-bold px-3 py-1 rounded-full mb-2">
+                    <span>📌</span> คุณใช้สิทธิ์การสอบครบตามโควต้าแล้ว (แสดงผลคะแนนล่าสุด)
+                </div>
+
+                <h2 class="text-xl font-extrabold text-gray-800">ผลการทดสอบ</h2>
+                <p id="resGrade" class="text-sm font-bold mt-0.5 mb-3.5">...</p>
+                
+                <div class="flex justify-center gap-3">
+                    <div class="bg-gray-50 rounded-2xl py-2.5 px-4 w-32 border border-gray-200/80">
+                        <div class="text-2xl font-extrabold text-gray-800" id="resScore">0</div>
+                        <div class="text-gray-500 text-[11px] font-medium">คะแนนรวม</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-2xl py-2.5 px-4 w-32 border border-gray-200/80">
+                        <div class="text-2xl font-extrabold text-gray-800" id="resPercent">0%</div>
+                        <div class="text-gray-500 text-[11px] font-medium">คิดเป็น</div>
                     </div>
                 </div>
             </div>
-            <div id="reviewSection" class="hidden flex-1 overflow-y-auto py-2 mb-4 text-left px-2 custom-scrollbar">
-                <h3 class="font-bold text-red-500 mb-3 flex items-center sticky top-0 bg-white py-2 border-b z-10"><span class="mr-2 text-xl">🅧</span> เฉลยข้อที่ตอบผิด</h3>
-                <div id="reviewContent" class="space-y-4"></div>
+
+            <!-- 3. ส่วนแสดงเฉลยข้อที่ตอบผิด (แยกส่วนหัวออกจาก Scroll ไม่ให้ข้อความซ้อนทับ) -->
+            <div id="reviewSection" class="hidden flex-col flex-1 overflow-hidden mb-4 text-left">
+                <h3 class="font-bold text-red-500 text-sm py-2 px-1 flex items-center shrink-0 border-b border-gray-100 bg-white">
+                    <span class="mr-1.5 text-base">🅧</span> เฉลยข้อที่ตอบผิด
+                </h3>
+                <div id="reviewContent" class="space-y-3 overflow-y-auto pt-3 pr-1 custom-scrollbar flex-1"></div>
             </div>
-            <div class="shrink-0 text-sm text-gray-500 flex justify-between bg-gray-50 p-3 rounded-lg mb-4">
-                <span>ผู้สอบ: <span id="resName" class="text-gray-800 font-medium"></span></span>
-                <span>เวลา: <span id="resTime" class="text-gray-800 font-medium"></span></span>
+
+            <!-- 4. ปุ่มดำเนินการต่อด้านล่าง -->
+            <div class="shrink-0 space-y-2.5 mt-auto">
+                <button onclick="openLeaderboard()" class="w-full py-3 bg-yellow-400 text-yellow-900 rounded-xl font-bold text-sm hover:bg-yellow-500 transition shadow-md ring-2 ring-yellow-200 flex items-center justify-center gap-2">🏆 ดูอันดับคะแนนสูงสุด</button>
+                <button onclick="window.open('https://liff.line.me/2000733931-wPdEZX0R/channels/5000640583/crm/member/dashboard', '_blank')" class="w-full py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-bold text-sm hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-md active:scale-95">ดูคะแนนสะสมพอยต์</button>
             </div>
-            <button onclick="openLeaderboard()" class="w-full py-3 mb-3 bg-yellow-400 text-yellow-900 rounded-xl font-bold hover:bg-yellow-500 transition shadow-lg ring-2 ring-yellow-200 flex items-center justify-center gap-2">🏆 ดูอันดับคะแนนสูงสุด</button>
-            <button onclick="window.open('https://liff.line.me/2000733931-wPdEZX0R/channels/5000640583/crm/member/dashboard', '_blank')" class="shrink-0 w-full py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-bold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg active:scale-95">ดูคะแนนสะสมพอยต์</button>
+
         </div>
     </div>
 
@@ -247,11 +278,10 @@
         const LIFF_ID = "1656846002-MnLVVNBD"; 
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx6Qq3EJQ41GWV5wzK3_h8rSjpZkvUVl7GHXIEJ2zdl-Iu5GyUBMOJDJud5ywMe1z5lZQ/exec"; 
 
-        // ⚡ อัปเกรดระบบเชื่อมต่อ GAS: เพิ่ม Timeout กันค้าง + ระบบลองส่งซ้ำอัตโนมัติ (Auto-Retry)
         async function fetchGAS(action, args = [], retries = 3) {
             for (let attempt = 1; attempt <= retries; attempt++) {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 25000); // กันหน้าจอค้างเกิน 25 วินาที
+                const timeoutId = setTimeout(() => controller.abort(), 25000);
 
                 try {
                     const response = await fetch(GAS_WEB_APP_URL, {
@@ -269,12 +299,11 @@
                     console.warn(`GAS Error [${action}] (Attempt ${attempt}/${retries}):`, err);
                     if (attempt === retries) throw err;
                     
-                    // หากเป็นการส่งคำตอบแล้วเน็ตสะดุด ให้แจ้งสถานะกำลังพยายามส่งใหม่บนหน้าจอ
                     if (action === 'saveQuizResult') {
                         const loadTxt = document.getElementById('loadingText');
                         if (loadTxt) loadTxt.innerText = `กำลังส่งคำตอบ... (ลองใหม่อีกครั้ง ${attempt}/${retries - 1})`;
                     }
-                    await new Promise(r => setTimeout(r, 1500 * attempt)); // รอจังหวะก่อนส่งซ้ำ
+                    await new Promise(r => setTimeout(r, 1500 * attempt));
                 }
             }
         }
@@ -288,7 +317,6 @@
         let userLinePic = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; 
         let currentLineUid = ""; 
 
-        // ⚡ โหลด Settings และเริ่มต้น LIFF พร้อมกันแบบ Parallel เพื่อลดเวลาเปิดแอป
         window.onload = async () => { 
             try {
                 const [settings] = await Promise.all([
@@ -352,7 +380,6 @@
             if(loadingCont) loadingCont.innerHTML = `<p class="text-sm font-bold text-red-500">เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณารีเฟรช</p>`;
         }
 
-        // ⚡ แอบโหลดข้อสอบรอไว้ล่วงหน้าในพื้นหลังทันทีที่ยืนยันตัวตนสำเร็จ
         function preloadQuestionsInBackground() {
             if (!state.preloadedQuestionsPromise) {
                 state.preloadedQuestionsPromise = fetchGAS('getQuizQuestions').catch(() => null);
@@ -461,7 +488,7 @@
             }).catch(alertErr);
         }
 
-        // 📌 ฟังก์ชันเริ่มทำแบบทดสอบ (ป้องกันการกดปุ่มเริ่มสอบรัวๆ)
+        // 📌 ตรวจสอบสิทธิ์: ถ้าครบโควต้าแล้ว ให้แสดงหน้าสรุปผลสอบเดิม (รูปที่ 1) ทันทีแทนป๊อปอัปสิทธิ์เต็ม
         async function startQuizNow() {
             if(!state.user.id || state.isStarting) return;
             state.isStarting = true;
@@ -475,9 +502,17 @@
                 if (res.attempts >= maxAttempts) {
                     state.isStarting = false;
                     document.getElementById('loadingOverlay').classList.add('hidden');
-                    document.getElementById('limitCountText').innerText = maxAttempts;
-                    document.getElementById('limitModal').classList.remove('hidden');
-                    document.getElementById('limitModal').classList.add('flex');
+                    
+                    // ถ้ามีข้อมูลผลสอบเดิมจาก Code.gs ให้เปิดหน้าสรุปผลคะแนนเดิมทันที
+                    if (res.bestResult) {
+                        const passed = res.bestResult.grade === "ผ่าน" || res.bestResult.percentage >= state.settings.passingPercentage;
+                        showResult(res.bestResult, passed, [], true);
+                    } else {
+                        // Fallback กรณีไม่ได้อัปเดต Code.gs
+                        document.getElementById('limitCountText').innerText = maxAttempts;
+                        document.getElementById('limitModal').classList.remove('hidden');
+                        document.getElementById('limitModal').classList.add('flex');
+                    }
                     return;
                 }
                 
@@ -496,7 +531,6 @@
 
         async function loadQuestions() {
             try {
-                // ดึงข้อสอบจากที่แอบโหลดไว้แล้ว ถ้ายังไม่มีค่อยโหลดใหม่
                 let qs = state.preloadedQuestionsPromise ? await state.preloadedQuestionsPromise : null;
                 if (!qs) qs = await fetchGAS('getQuizQuestions');
                 
@@ -584,7 +618,6 @@
             });
         }
 
-        // 🔒 อัปเกรดระบบส่งคำตอบ: ป้องกันการกดส่งซ้ำ 100% และจำค่าเดิมไว้ส่งใหม่ได้หากเน็ตหลุด
         function submitQuiz(auto) {
             if (state.isSubmitting || state.isSubmitted) return;
             state.isSubmitting = true;
@@ -596,7 +629,6 @@
             document.getElementById('loadingText').innerText = "กำลังบันทึกคะแนน...";
             document.getElementById('loadingOverlay').classList.remove('hidden');
 
-            // คำนวณผลลัพธ์เพียงครั้งเดียว (ถ้าเคยคำนวณไว้แล้วให้ใช้ค่าเดิมเพื่อไม่ให้เวลาเพี้ยนตอนกดส่งซ้ำ)
             if (!state.cachedSubmission) {
                 endTime = new Date(); 
                 let score = 0; 
@@ -632,7 +664,7 @@
                 state.isSubmitted = true;
                 state.isSubmitting = false;
                 document.getElementById('loadingText').innerText = "กำลังโหลด...";
-                showResult(result, passed, incorrectIndices);
+                showResult(result, passed, incorrectIndices, false);
             }).catch((err) => { 
                 state.isSubmitting = false;
                 if (btnNext) btnNext.disabled = false;
@@ -642,28 +674,87 @@
             });
         }
 
-        function showResult(res, passed, incorrectIndices) {
-            document.getElementById('loadingOverlay').classList.add('hidden'); const modal = document.getElementById('resultModal');
-            modal.classList.remove('hidden'); modal.classList.add('flex');
-            document.getElementById('resIcon').innerText = passed ? "🏆" : "💪";
+        // 📌 แสดงผลลัพธ์ (รองรับทั้งตอนส่งข้อสอบเสร็จใหม่ๆ และตอนเปิดดูประวัติย้อนหลังเมื่อโควต้าเต็ม)
+        function showResult(res, passed, incorrectIndices = [], isPastAttempt = false) {
+            document.getElementById('loadingOverlay').classList.add('hidden'); 
+            const modal = document.getElementById('resultModal');
+            modal.classList.remove('hidden'); 
+            modal.classList.add('flex');
+
+            // แสดงรูปโปรไฟล์ LINE + ชื่อ + เวลา
+            document.getElementById('resProfilePic').src = userLinePic || res.profilePic || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+            document.getElementById('resName').innerText = res.fullName || state.user.name;
+            document.getElementById('resTime').innerText = (res.duration || "0:00") + " นาที";
+
+            // แสดงป้ายแจ้งเตือนหากเป็นการเข้ามาดูซ้ำตอนสิทธิ์เต็ม
+            const badge = document.getElementById('quotaNoticeBadge');
+            if (badge) {
+                if (isPastAttempt) badge.classList.remove('hidden');
+                else badge.classList.add('hidden');
+            }
+
             document.getElementById('resGrade').innerText = passed ? "ยินดีด้วย! คุณผ่านเกณฑ์" : "พยายามอีกนิด คุณยังไม่ผ่านเกณฑ์";
-            document.getElementById('resGrade').className = passed ? "text-lg font-bold mb-6 text-green-600" : "text-lg font-bold mb-6 text-red-500";
-            document.getElementById('resScore').innerText = `${res.score}/${res.totalQuestions}`; document.getElementById('resName').innerText = res.fullName;
-            document.getElementById('resTime').innerText = res.duration; document.getElementById('resPercent').innerText = res.percentage + "%";
-            const reviewSection = document.getElementById('reviewSection'); const reviewContent = document.getElementById('reviewContent');
-            if (incorrectIndices.length > 0) {
-                reviewSection.classList.remove('hidden'); reviewContent.innerHTML = ''; 
+            document.getElementById('resGrade').className = passed ? "text-sm font-bold mt-0.5 mb-3.5 text-green-600" : "text-sm font-bold mt-0.5 mb-3.5 text-red-500";
+            document.getElementById('resScore').innerText = `${res.score}/${res.totalQuestions}`; 
+            document.getElementById('resPercent').innerText = res.percentage + "%";
+
+            const reviewSection = document.getElementById('reviewSection'); 
+            const reviewContent = document.getElementById('reviewContent');
+            reviewContent.innerHTML = '';
+
+            // กรณีที่ 1: เพิ่งทำข้อสอบเสร็จสดๆ (ดึงจาก state.questions)
+            if (incorrectIndices && incorrectIndices.length > 0 && state.questions.length > 0) {
+                reviewSection.classList.remove('hidden');
+                reviewSection.classList.add('flex');
                 incorrectIndices.forEach(idx => {
-                    const q = state.questions[idx]; const userAnsIdx = state.answers[idx];
-                    const userAnsText = userAnsIdx !== null ? q.options[userAnsIdx] : "ไม่ได้ตอบ"; const correctAnsText = q.options[q.correct];
-                    const tempDiv = document.createElement("div"); tempDiv.innerHTML = q.question; const questionText = tempDiv.textContent || tempDiv.innerText || "";
-                    const item = document.createElement('div'); item.className = "bg-gray-50 rounded-xl p-4 border border-gray-200 text-sm hover:shadow-sm transition";
-                    item.innerHTML = `<div class="font-bold text-gray-700 mb-2 border-b pb-2 border-gray-200"><span class="text-red-500 mr-1">ข้อที่ ${idx + 1}:</span> ${questionText}</div>
-                        <div class="space-y-1"><div class="text-red-600 flex items-start bg-red-50 p-1 rounded"><span class="mr-2 min-w-[60px] font-bold">🅧 ตอบ:</span> <span>${userAnsText}</span></div>
-                        <div class="text-green-600 flex items-start bg-green-50 p-1 rounded"><span class="mr-2 min-w-[60px] font-bold">✅ ถูก:</span> <span>${correctAnsText}</span></div></div>`;
+                    const q = state.questions[idx]; 
+                    const userAnsIdx = state.answers[idx];
+                    const userAnsText = userAnsIdx !== null ? q.options[userAnsIdx] : "ไม่ได้ตอบ"; 
+                    const correctAnsText = q.options[q.correct];
+                    const tempDiv = document.createElement("div"); tempDiv.innerHTML = q.question; 
+                    const questionText = tempDiv.textContent || tempDiv.innerText || "";
+                    
+                    const item = document.createElement('div'); 
+                    item.className = "bg-gray-50 rounded-xl p-3.5 border border-gray-200/80 text-xs hover:shadow-sm transition";
+                    item.innerHTML = `<div class="font-bold text-gray-700 mb-2 border-b pb-1.5 border-gray-200"><span class="text-red-500 mr-1">ข้อที่ ${idx + 1}:</span> ${questionText}</div>
+                        <div class="space-y-1">
+                            <div class="text-red-600 flex items-start bg-red-50 p-1.5 rounded-lg"><span class="mr-2 min-w-[48px] font-bold">🅧 ตอบ:</span> <span>${userAnsText}</span></div>
+                            <div class="text-green-600 flex items-start bg-green-50 p-1.5 rounded-lg"><span class="mr-2 min-w-[48px] font-bold">✅ ถูก:</span> <span>${correctAnsText}</span></div>
+                        </div>`;
                     reviewContent.appendChild(item);
                 });
-            } else { reviewSection.classList.add('hidden'); }
+            } 
+            // กรณีที่ 2: เข้ามาดูซ้ำหลังโควต้าเต็ม (สกัดข้อที่ตอบผิดจาก AnswerLog ที่เก็บไว้ใน Sheet)
+            else if (isPastAttempt && res.answerLog) {
+                const blocks = res.answerLog.split('----------------').map(b => b.trim()).filter(b => b.startsWith('🅧'));
+                if (blocks.length > 0) {
+                    reviewSection.classList.remove('hidden');
+                    reviewSection.classList.add('flex');
+                    blocks.forEach(block => {
+                        const lines = block.split('\n').map(l => l.trim());
+                        const headerMatch = lines[0].match(/\[ข้อ\s*(\d+)\]\s*(.*)/);
+                        const qNum = headerMatch ? headerMatch[1] : "";
+                        const qTitle = headerMatch ? headerMatch[2] : lines[0].replace('🅧', '').trim();
+                        const uAns = lines[1] ? lines[1].replace(/^ตอบ:\s*/, '') : "-";
+                        const cAns = lines[2] ? lines[2].replace(/^\(เฉลย:\s*/, '').replace(/\)$/, '') : "-";
+
+                        const item = document.createElement('div'); 
+                        item.className = "bg-gray-50 rounded-xl p-3.5 border border-gray-200/80 text-xs hover:shadow-sm transition";
+                        item.innerHTML = `<div class="font-bold text-gray-700 mb-2 border-b pb-1.5 border-gray-200"><span class="text-red-500 mr-1">ข้อที่ ${qNum}:</span> ${qTitle}</div>
+                            <div class="space-y-1">
+                                <div class="text-red-600 flex items-start bg-red-50 p-1.5 rounded-lg"><span class="mr-2 min-w-[48px] font-bold">🅧 ตอบ:</span> <span>${uAns}</span></div>
+                                <div class="text-green-600 flex items-start bg-green-50 p-1.5 rounded-lg"><span class="mr-2 min-w-[48px] font-bold">✅ ถูก:</span> <span>${cAns}</span></div>
+                            </div>`;
+                        reviewContent.appendChild(item);
+                    });
+                } else {
+                    reviewSection.classList.add('hidden');
+                    reviewSection.classList.remove('flex');
+                }
+            } else { 
+                reviewSection.classList.add('hidden'); 
+                reviewSection.classList.remove('flex');
+            }
         }
 
         function openLeaderboard() {
